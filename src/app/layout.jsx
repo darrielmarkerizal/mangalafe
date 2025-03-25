@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/sonner";
 import { Montserrat, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -24,6 +25,7 @@ export default function RootLayout({ children }) {
         className={`${montserrat.variable} ${plusJakartaSans.variable} antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );
