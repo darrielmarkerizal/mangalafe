@@ -1,32 +1,48 @@
-"use strict";
-const { Model } = require("sequelize");
+import { DataTypes, Model } from "sequelize";
+import { sequelize } from "../config/database.js";
 
-module.exports = (sequelize, DataTypes) => {
-  class ProjectService extends Model {
-    static associate(models) {
-      models.ProjectService.belongsTo(models.Project, {
-        foreignKey: "projectId",
-      });
-      models.ProjectService.belongsTo(models.Service, {
-        foreignKey: "serviceId",
-      });
-    }
+class ProjectService extends Model {
+  static associate(models) {
+    ProjectService.belongsTo(models.Project, {
+      foreignKey: "projectId",
+    });
+    ProjectService.belongsTo(models.Service, {
+      foreignKey: "serviceId",
+    });
   }
-  ProjectService.init(
-    {
-      projectId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      serviceId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+}
+
+ProjectService.init(
+  {
+    projectId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: "Project ID harus diisi",
+        },
+        isInt: {
+          msg: "Project ID harus berupa angka",
+        },
       },
     },
-    {
-      sequelize,
-      modelName: "ProjectService",
-    }
-  );
-  return ProjectService;
-};
+    serviceId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: "Service ID harus diisi",
+        },
+        isInt: {
+          msg: "Service ID harus berupa angka",
+        },
+      },
+    },
+  },
+  {
+    sequelize,
+    modelName: "ProjectService",
+  }
+);
+
+export default ProjectService;

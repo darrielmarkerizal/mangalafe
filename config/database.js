@@ -1,10 +1,8 @@
 import { Sequelize } from "sequelize";
 import mysql2 from "mysql2";
 
-// Singleton untuk koneksi database
 let sequelize;
 
-// Pastikan tidak membuat koneksi baru setiap kali file diimpor
 if (!global.sequelize) {
   sequelize = new Sequelize(
     process.env.DB_NAME,
