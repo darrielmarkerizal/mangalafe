@@ -127,7 +127,6 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  // Mulai transaction
   const t = await sequelize.transaction();
 
   try {
@@ -145,7 +144,6 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    // Validasi field yang diperlukan
     const requiredFields = ["name", "initiator", "period", "services"];
     const missingFields = requiredFields.filter((field) => !body[field]);
 
@@ -160,7 +158,6 @@ export async function POST(request) {
       );
     }
 
-    // Validasi services harus array dan minimal 1
     if (!Array.isArray(body.services) || body.services.length === 0) {
       await t.rollback();
       return NextResponse.json(
@@ -172,7 +169,6 @@ export async function POST(request) {
       );
     }
 
-    // Validasi period
     if (body.period < 2000 || body.period > 2100) {
       await t.rollback();
       return NextResponse.json(
@@ -184,7 +180,6 @@ export async function POST(request) {
       );
     }
 
-    // Validasi service IDs exist
     const services = await Service.findAll({
       where: {
         id: body.services,
@@ -203,7 +198,6 @@ export async function POST(request) {
       );
     }
 
-    // Buat project baru
     const newProject = await Project.create(
       {
         name: body.name,
@@ -214,7 +208,6 @@ export async function POST(request) {
       { transaction: t }
     );
 
-    // Buat relasi project-service
     await ProjectService.bulkCreate(
       body.services.map((serviceId) => ({
         projectId: newProject.id,
@@ -223,10 +216,8 @@ export async function POST(request) {
       { transaction: t }
     );
 
-    // Commit transaction
     await t.commit();
 
-    // Ambil project dengan relasinya
     const projectWithServices = await Project.findOne({
       where: { id: newProject.id },
       include: [
@@ -246,7 +237,6 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
-    // Hanya lakukan rollback jika transaction masih aktif
     if (t && !t.finished) {
       await t.rollback();
     }
@@ -270,6 +260,238 @@ export async function POST(request) {
       {
         success: false,
         message: "Gagal membuat proyek",
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request) {
+  const t = await sequelize.transaction();
+
+  try {
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      await t.rollback();
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized - Bearer token diperlukan",
+        },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+
+    if (!body.id) {
+      await t.rollback();
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ID proyek harus disertakan",
+        },
+        { status: 400 }
+      );
+    }
+
+    const existingProject = await Project.findByPk(body.id);
+    if (!existingProject) {
+      await t.rollback();
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Proyek tidak ditemukan",
+        },
+        { status: 404 }
+      );
+    }
+
+    if (body.period && (body.period < 2000 || body.period > 2100)) {
+      await t.rollback();
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Periode harus berada di antara tahun 2000-2100",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (body.services) {
+      if (!Array.isArray(body.services) || body.services.length === 0) {
+        await t.rollback();
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Minimal harus memilih 1 layanan",
+          },
+          { status: 400 }
+        );
+      }
+
+      const services = await Service.findAll({
+        where: {
+          id: body.services,
+        },
+        transaction: t,
+      });
+
+      if (services.length !== body.services.length) {
+        await t.rollback();
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Beberapa ID layanan tidak valid",
+          },
+          { status: 400 }
+        );
+      }
+
+      await ProjectService.destroy({
+        where: { projectId: body.id },
+        transaction: t,
+      });
+
+      await ProjectService.bulkCreate(
+        body.services.map((serviceId) => ({
+          projectId: body.id,
+          serviceId: serviceId,
+        })),
+        { transaction: t }
+      );
+    }
+
+    const updateData = {
+      name: body.name || existingProject.name,
+      initiator: body.initiator || existingProject.initiator,
+      period: body.period || existingProject.period,
+      photo: body.photo !== undefined ? body.photo : existingProject.photo,
+    };
+
+    await existingProject.update(updateData, { transaction: t });
+
+    await t.commit();
+
+    const updatedProject = await Project.findOne({
+      where: { id: body.id },
+      include: [
+        {
+          model: Service,
+          through: { attributes: [] },
+          attributes: ["id", "name"],
+        },
+      ],
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Berhasil mengupdate proyek",
+        data: updatedProject,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    if (t && !t.finished) {
+      await t.rollback();
+    }
+
+    if (
+      error.name === "SequelizeValidationError" ||
+      error.name === "SequelizeUniqueConstraintError"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Validasi gagal",
+          error: error.errors.map((err) => err.message),
+        },
+        { status: 400 }
+      );
+    }
+
+    console.error("Gagal mengupdate proyek:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Gagal mengupdate proyek",
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request) {
+  const t = await sequelize.transaction();
+
+  try {
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      await t.rollback();
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized - Bearer token diperlukan",
+        },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      await t.rollback();
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ID proyek harus disertakan",
+        },
+        { status: 400 }
+      );
+    }
+
+    const existingProject = await Project.findByPk(id);
+    if (!existingProject) {
+      await t.rollback();
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Proyek tidak ditemukan",
+        },
+        { status: 404 }
+      );
+    }
+
+    await ProjectService.destroy({
+      where: { projectId: id },
+      transaction: t,
+    });
+
+    await existingProject.destroy({ transaction: t });
+
+    await t.commit();
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Berhasil menghapus proyek",
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    if (t && !t.finished) {
+      await t.rollback();
+    }
+
+    console.error("Gagal menghapus proyek:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Gagal menghapus proyek",
         error: error.message,
       },
       { status: 500 }
