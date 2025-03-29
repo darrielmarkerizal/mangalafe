@@ -1,30 +1,32 @@
-"use strict";
-const { Model } = require("sequelize");
+import { DataTypes, Model } from "sequelize";
+import { sequelize } from "../config/database.js";
 
-module.exports = (sequelize, DataTypes) => {
-  class Service extends Model {
-    static associate(models) {
-      models.Service.belongsToMany(models.Project, {
-        through: "ProjectService",
-        foreignKey: "serviceId",
-        otherKey: "projectId",
-      });
-    }
+class Service extends Model {
+  static associate(models) {
+    Service.belongsToMany(models.Project, {
+      through: "ProjectService",
+      foreignKey: "serviceId",
+      otherKey: "projectId",
+    });
   }
-  Service.init(
-    {
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
+}
+
+Service.init(
+  {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: "Nama layanan harus diisi",
         },
       },
     },
-    {
-      sequelize,
-      modelName: "Service",
-    }
-  );
-  return Service;
-};
+  },
+  {
+    sequelize,
+    modelName: "Service",
+  }
+);
+
+export default Service;

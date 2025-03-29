@@ -23,6 +23,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body
         className={`${montserrat.variable} ${plusJakartaSans.variable} antialiased`}
+        suppressHydrationWarning
       >
         {children}
         <Toaster />
