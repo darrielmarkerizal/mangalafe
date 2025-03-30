@@ -16,8 +16,10 @@ export async function GET(request) {
     const sortOrder = searchParams.get("sortOrder") || "DESC";
     const page = parseInt(searchParams.get("page")) || 1;
     const perPage = parseInt(searchParams.get("perPage")) || 10;
+    const period = searchParams.get("period");
+    const service = searchParams.get("service");
 
-    const allowedSortFields = ["name", "createdAt"];
+    const allowedSortFields = ["name", "createdAt", "period", "initiator"];
     const allowedSortOrders = ["ASC", "DESC"];
 
     if (!allowedSortFields.includes(sortBy)) {
@@ -25,7 +27,7 @@ export async function GET(request) {
         {
           success: false,
           message:
-            "Parameter sortBy tidak valid. Gunakan 'name' atau 'createdAt'",
+            "Parameter sortBy tidak valid. Gunakan 'name', 'period', 'initiator', atau 'createdAt'",
         },
         { status: 400 }
       );
@@ -41,38 +43,87 @@ export async function GET(request) {
       );
     }
 
-    const queryOptions = {
-      order: [[sortBy, sortOrder]],
-      limit: perPage,
-      offset: (page - 1) * perPage,
-      include: [
-        {
-          model: Service,
-          through: { attributes: [] },
-          attributes: ["id", "name"],
-        },
-      ],
-    };
+    let whereCondition = {};
+
+    if (period) {
+      whereCondition.period = period;
+    }
 
     if (search) {
-      queryOptions.where = {
+      whereCondition = {
         [Op.or]: [
-          {
-            name: {
-              [Op.like]: `%${search}%`,
-            },
-          },
-          {
-            "$Services.name$": {
-              [Op.like]: `%${search}%`,
-            },
-          },
+          { name: { [Op.like]: `%${search}%` } },
+          { initiator: { [Op.like]: `%${search}%` } },
         ],
       };
     }
 
-    const { count: totalItems, rows: projects } =
-      await Project.findAndCountAll(queryOptions);
+    const baseInclude = [
+      {
+        model: Service,
+        through: { attributes: [] },
+        attributes: ["id", "name"],
+      },
+    ];
+
+    if (service) {
+      baseInclude[0].where = { id: service };
+    }
+
+    let projectIds = [];
+    if (search) {
+      const matchingServices = await Service.findAll({
+        where: {
+          name: {
+            [Op.like]: `%${search}%`,
+          },
+        },
+        include: [
+          {
+            model: Project,
+            through: { attributes: [] },
+            attributes: ["id"],
+          },
+        ],
+      });
+
+      const serviceProjectIds = matchingServices.flatMap((service) =>
+        service.Projects.map((project) => project.id)
+      );
+
+      if (serviceProjectIds.length > 0) {
+        projectIds = serviceProjectIds;
+
+        whereCondition = {
+          [Op.or]: [
+            { name: { [Op.like]: `%${search}%` } },
+            { initiator: { [Op.like]: `%${search}%` } },
+            { id: { [Op.in]: projectIds } },
+          ],
+        };
+
+        if (period) {
+          whereCondition = {
+            [Op.and]: [whereCondition, { period: period }],
+          };
+        }
+      }
+    }
+
+    const { count: totalItems } = await Project.findAndCountAll({
+      where: whereCondition,
+      include: baseInclude,
+      distinct: true,
+    });
+
+    const projects = await Project.findAll({
+      where: whereCondition,
+      order: [[sortBy, sortOrder]],
+      limit: perPage,
+      offset: (page - 1) * perPage,
+      include: baseInclude,
+      distinct: true,
+    });
 
     const totalPages = Math.ceil(totalItems / perPage);
     const hasNextPage = page < totalPages;
@@ -283,20 +334,23 @@ export async function PUT(request) {
       );
     }
 
-    const body = await request.json();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
 
-    if (!body.id) {
+    if (!id) {
       await t.rollback();
       return NextResponse.json(
         {
           success: false,
-          message: "ID proyek harus disertakan",
+          message: "ID proyek harus disertakan sebagai query parameter",
         },
         { status: 400 }
       );
     }
 
-    const existingProject = await Project.findByPk(body.id);
+    const body = await request.json();
+
+    const existingProject = await Project.findByPk(id);
     if (!existingProject) {
       await t.rollback();
       return NextResponse.json(
@@ -350,13 +404,13 @@ export async function PUT(request) {
       }
 
       await ProjectService.destroy({
-        where: { projectId: body.id },
+        where: { projectId: id },
         transaction: t,
       });
 
       await ProjectService.bulkCreate(
         body.services.map((serviceId) => ({
-          projectId: body.id,
+          projectId: id,
           serviceId: serviceId,
         })),
         { transaction: t }
@@ -375,7 +429,7 @@ export async function PUT(request) {
     await t.commit();
 
     const updatedProject = await Project.findOne({
-      where: { id: body.id },
+      where: { id: id },
       include: [
         {
           model: Service,

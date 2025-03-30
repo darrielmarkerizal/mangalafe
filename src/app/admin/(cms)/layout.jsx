@@ -33,16 +33,10 @@ export default function AdminLayout({ children }) {
       current: pathname === "/admin/projects",
     },
     {
-      name: "Pengguna",
+      name: "Admin",
       href: "/admin/users",
       icon: UserIcon,
       current: pathname === "/admin/users",
-    },
-    {
-      name: "Pengaturan",
-      href: "/admin/settings",
-      icon: SettingsIcon,
-      current: pathname === "/admin/settings",
     },
   ];
 
