@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import Cookies from "js-cookie";
 import {
   LayoutDashboardIcon,
   FileTextIcon,
@@ -14,10 +15,13 @@ import {
   XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const navigation = [
     {
@@ -39,6 +43,23 @@ export default function AdminLayout({ children }) {
       current: pathname === "/admin/users",
     },
   ];
+
+  const handleLogout = () => {
+    setIsLoggingOut(true);
+    try {
+      Cookies.remove("token");
+      Cookies.remove("user");
+
+      toast.success("Berhasil keluar dari sistem");
+
+      router.push("/admin");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Gagal keluar dari sistem");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-muted/20">
@@ -95,9 +116,13 @@ export default function AdminLayout({ children }) {
             <Button
               variant="outline"
               className="w-full justify-start gap-3 text-muted-foreground"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
             >
-              <LogOutIcon className="h-5 w-5" />
-              Keluar
+              <LogOutIcon
+                className={`h-5 w-5 ${isLoggingOut ? "animate-spin" : ""}`}
+              />
+              {isLoggingOut ? "Keluar..." : "Keluar"}
             </Button>
           </div>
         </div>
@@ -133,9 +158,13 @@ export default function AdminLayout({ children }) {
             <Button
               variant="outline"
               className="w-full justify-start gap-3 text-muted-foreground"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
             >
-              <LogOutIcon className="h-5 w-5" />
-              Keluar
+              <LogOutIcon
+                className={`h-5 w-5 ${isLoggingOut ? "animate-spin" : ""}`}
+              />
+              {isLoggingOut ? "Keluar..." : "Keluar"}
             </Button>
           </div>
         </div>
