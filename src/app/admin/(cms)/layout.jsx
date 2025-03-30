@@ -34,13 +34,13 @@ export default function AdminLayout({ children }) {
       name: "Proyek",
       href: "/admin/projects",
       icon: FileTextIcon,
-      current: pathname === "/admin/projects",
+      current: pathname.startsWith("/admin/projects"),
     },
     {
       name: "Admin",
       href: "/admin/users",
       icon: UserIcon,
-      current: pathname === "/admin/users",
+      current: pathname.startsWith("/admin/users"),
     },
   ];
 

@@ -1,3 +1,5 @@
+import AdminTable from "@/components/cms/admin/admin-table";
+
 export default function AdminPage() {
-  return <div>Halaman Admin</div>;
+  return <AdminTable />;
 }
