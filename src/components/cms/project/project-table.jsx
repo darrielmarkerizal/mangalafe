@@ -226,7 +226,7 @@ export default function ProjectPage() {
   const confirmDelete = async () => {
     setIsLoading(true);
     try {
-      // Get token from cookie instead of localStorage for better security
+      // Get token from cookie instead of  for better security
       // This assumes you have a js-cookie or similar library
       const token = document.cookie
         .split("; ")

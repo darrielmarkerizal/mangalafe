@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
+import { UserIcon, MailIcon, LockIcon } from "lucide-react";
 
 import {
   Form,
@@ -102,8 +103,14 @@ export function LoginForm({ className, ...props }) {
 
   return (
     <div className={cn("flex flex-col gap-6 w-full", className)} {...props}>
-      <Card className="w-full shadow-lg">
-        <CardHeader className="space-y-2 sm:space-y-3">
+      <Card className="w-full shadow-lg bg-white rounded-xl overflow-hidden border-0">
+        <div className="h-2 bg-primary w-full"></div>
+        <CardHeader className="space-y-2 sm:space-y-3 pt-8">
+          <div className="mx-auto mb-2">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+              <UserIcon className="h-8 w-8 text-primary" />
+            </div>
+          </div>
           <CardTitle className="text-xl sm:text-2xl md:text-3xl text-center font-[family-name:var(--font-montserrat)]">
             Login Admin
           </CardTitle>
@@ -111,7 +118,7 @@ export function LoginForm({ className, ...props }) {
             Masukkan email dan kata sandi Anda untuk masuk ke dashboard admin
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 font-[family-name:var(--font-plus-jakarta-sans)]">
+        <CardContent className="p-6 sm:p-8 font-[family-name:var(--font-plus-jakarta-sans)]">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -126,17 +133,20 @@ export function LoginForm({ className, ...props }) {
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">
+                    <FormLabel className="text-sm sm:text-base font-medium">
                       Email
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        type="email"
-                        placeholder="m@example.com"
-                        className="h-10 sm:h-11 md:h-12"
-                        disabled={isLoading}
-                      />
+                      <div className="relative">
+                        <MailIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          {...field}
+                          type="email"
+                          placeholder="m@example.com"
+                          className="h-11 sm:h-12 pl-10 transition-all focus-visible:ring-primary"
+                          disabled={isLoading}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -151,21 +161,24 @@ export function LoginForm({ className, ...props }) {
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">
-                      Password
-                    </FormLabel>
+                    <div className="flex justify-between items-center">
+                      <FormLabel className="text-sm sm:text-base font-medium">
+                        Password
+                      </FormLabel>
+                    </div>
                     <FormControl>
                       <div className="relative">
+                        <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         <Input
                           {...field}
                           type={showPassword ? "text" : "password"}
                           placeholder="Masukkan kata sandi"
-                          className="h-10 sm:h-11 md:h-12"
+                          className="h-11 sm:h-12 pl-10 transition-all focus-visible:ring-primary"
                           disabled={isLoading}
                         />
                         <button
                           type="button"
-                          className="absolute right-3 top-1/2 -translate-y-1/2"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-muted/50 p-1 rounded-full transition-colors"
                           onClick={togglePasswordVisibility}
                           aria-label={
                             showPassword
@@ -189,7 +202,7 @@ export function LoginForm({ className, ...props }) {
 
               <Button
                 type="submit"
-                className="w-full h-10 sm:h-11 md:h-12 text-sm sm:text-base"
+                className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium shadow-sm hover:shadow transition-all"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -198,12 +211,15 @@ export function LoginForm({ className, ...props }) {
                     Memproses...
                   </>
                 ) : (
-                  "Login"
+                  "Masuk ke Dashboard"
                 )}
               </Button>
             </form>
           </Form>
         </CardContent>
+        <div className="p-4 bg-muted/10 border-t text-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} PT Mangala Dipa. All rights reserved.
+        </div>
       </Card>
     </div>
   );

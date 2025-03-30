@@ -62,7 +62,7 @@ export default function AdminLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-screen bg-[#F2F4F8]">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
