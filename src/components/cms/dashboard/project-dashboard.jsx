@@ -10,6 +10,7 @@ import {
   RefreshCwIcon,
   FileTextIcon,
   PlusIcon,
+  LayoutDashboardIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,12 +24,16 @@ import {
   CarIcon,
   SearchIcon,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 
 export function ProjectDashboard() {
   const [projects, setProjects] = useState([]);
   const [statsData, setStatsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [metadata, setMetadata] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStats, setFilteredStats] = useState([]);
   const router = useRouter();
 
   const fetchDashboardData = async () => {
@@ -125,6 +130,7 @@ export function ProjectDashboard() {
           },
         ];
         setStatsData(mappedStats);
+        setFilteredStats(mappedStats);
       } else {
         toast.error("Gagal memuat data dashboard", {
           description: response.data.message,
@@ -143,6 +149,21 @@ export function ProjectDashboard() {
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  // Filter stats when search query changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredStats(statsData);
+      return;
+    }
+
+    const filtered = statsData.filter(
+      (stat) =>
+        stat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        stat.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredStats(filtered);
+  }, [searchQuery, statsData]);
 
   const handleViewProject = (project) => {
     router.push(`/admin/projects/${project.id}`);
@@ -173,50 +194,237 @@ export function ProjectDashboard() {
     }
   };
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
   return (
     <div className="space-y-8">
-      {/* Header with summary */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border">
-        <h1 className="text-2xl font-bold mb-2">Dashboard Proyek</h1>
-        <p className="text-muted-foreground">
-          Ringkasan data proyek PT Mangala Dipa. Total{" "}
-          {isLoading ? "..." : statsData[0]?.value || 0} proyek tercatat dalam
-          sistem.
-        </p>
+      {/* Dashboard Header with Search */}
+      <motion.div
+        className="bg-white p-6 rounded-xl shadow-sm border overflow-hidden relative"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mt-32 -mr-32 blur-3xl"></div>
+        <div className="relative z-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <LayoutDashboardIcon className="h-6 w-6 text-primary" />
+                Dashboard Proyek
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Ringkasan data proyek PT Mangala Dipa. Total{" "}
+                <span className="font-semibold text-foreground">
+                  {isLoading ? "..." : statsData[0]?.value || 0}
+                </span>{" "}
+                proyek tercatat dalam sistem.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Cari statistik..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-4 h-9 w-full max-w-[200px] bg-muted/20"
+                />
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchDashboardData}
+                disabled={isLoading}
+                className="h-9"
+              >
+                <RefreshCwIcon
+                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                />
+                <span className="sr-only">Refresh</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Stats Cards with Tabbed View for Mobile */}
+      <div className="block md:hidden">
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="mb-4 grid grid-cols-3 h-auto p-1">
+            <TabsTrigger value="all" className="text-xs py-2">
+              Semua
+            </TabsTrigger>
+            <TabsTrigger value="popular" className="text-xs py-2">
+              Utama
+            </TabsTrigger>
+            <TabsTrigger value="other" className="text-xs py-2">
+              Lainnya
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all">
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="grid gap-4 grid-cols-1 sm:grid-cols-2"
+            >
+              <AnimatePresence>
+                {(filteredStats.length > 0 ? filteredStats : statsData).map(
+                  (stat, index) => (
+                    <motion.div
+                      key={stat.title}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      layout
+                    >
+                      <StatCard
+                        title={stat.title}
+                        value={stat.value}
+                        description={stat.description}
+                        icon={stat.icon}
+                        iconColor={stat.iconColor}
+                        isLoading={isLoading}
+                      />
+                    </motion.div>
+                  )
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="popular">
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="grid gap-4 grid-cols-1 sm:grid-cols-2"
+            >
+              <AnimatePresence>
+                {(filteredStats.length > 0 ? filteredStats : statsData)
+                  .slice(0, 4)
+                  .map((stat) => (
+                    <motion.div
+                      key={stat.title}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      layout
+                    >
+                      <StatCard
+                        title={stat.title}
+                        value={stat.value}
+                        description={stat.description}
+                        icon={stat.icon}
+                        iconColor={stat.iconColor}
+                        isLoading={isLoading}
+                      />
+                    </motion.div>
+                  ))}
+              </AnimatePresence>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="other">
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="grid gap-4 grid-cols-1 sm:grid-cols-2"
+            >
+              <AnimatePresence>
+                {(filteredStats.length > 0 ? filteredStats : statsData)
+                  .slice(4)
+                  .map((stat) => (
+                    <motion.div
+                      key={stat.title}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      layout
+                    >
+                      <StatCard
+                        title={stat.title}
+                        value={stat.value}
+                        description={stat.description}
+                        icon={stat.icon}
+                        iconColor={stat.iconColor}
+                        isLoading={isLoading}
+                      />
+                    </motion.div>
+                  ))}
+              </AnimatePresence>
+            </motion.div>
+          </TabsContent>
+        </Tabs>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-        {statsData.length > 0
-          ? statsData.map((stat, index) => (
-              <StatCard
-                key={index}
-                title={stat.title}
-                value={stat.value}
-                description={stat.description}
-                icon={stat.icon}
-                iconColor={stat.iconColor}
-                isLoading={isLoading}
-              />
-            ))
-          : // Skeleton placeholder saat data belum ada
-            Array(9)
-              .fill(0)
-              .map((_, index) => (
-                <StatCard
-                  key={index}
-                  title=""
-                  value=""
-                  description=""
-                  icon={FileTextIcon}
-                  isLoading={true}
-                />
-              ))}
+      {/* Desktop Stats Grid */}
+      <div className="hidden md:block">
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid gap-4 md:gap-6 grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        >
+          <AnimatePresence>
+            {(filteredStats.length > 0 ? filteredStats : statsData).map(
+              (stat, index) => (
+                <motion.div
+                  key={stat.title}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  layout
+                >
+                  <StatCard
+                    title={stat.title}
+                    value={stat.value}
+                    description={stat.description}
+                    icon={stat.icon}
+                    iconColor={stat.iconColor}
+                    isLoading={isLoading}
+                  />
+                </motion.div>
+              )
+            )}
+
+            {/* Placeholder for no results when filtering */}
+            {filteredStats.length === 0 && !isLoading && searchQuery && (
+              <motion.div
+                className="col-span-full flex flex-col items-center justify-center py-8 text-center bg-white rounded-xl border p-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <SearchIcon className="h-10 w-10 text-muted-foreground/30 mb-2" />
+                <p className="text-sm font-medium">Tidak ada hasil ditemukan</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Tidak dapat menemukan statistik untuk "{searchQuery}"
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => setSearchQuery("")}
+                >
+                  Hapus Pencarian
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </div>
 
       {/* Project Table Section */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
+      <motion.div
+        className="space-y-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+      >
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <FileTextIcon className="h-5 w-5 text-primary" />
             Proyek Terbaru
@@ -239,6 +447,7 @@ export function ProjectDashboard() {
               <Button variant="default" size="sm" className="gap-2">
                 <PlusIcon className="h-4 w-4" />
                 <span className="hidden sm:inline">Proyek Baru</span>
+                <span className="inline sm:hidden">Tambah</span>
               </Button>
             </Link>
           </div>
@@ -252,18 +461,22 @@ export function ProjectDashboard() {
           onDelete={handleDeleteProject}
         />
 
-        <div className="flex justify-end mt-6">
+        <motion.div className="flex justify-end mt-6" whileHover="hover">
           <Link href="/admin/projects">
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 transition-all hover:pr-5"
-            >
+            <Button variant="outline" className="flex items-center gap-2 group">
               Lihat Semua Proyek
-              <ArrowRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <motion.div
+                variants={{
+                  hover: { x: 5 },
+                }}
+                transition={{ duration: 0.2 }}
+              >
+                <ArrowRightIcon className="h-4 w-4" />
+              </motion.div>
             </Button>
           </Link>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
