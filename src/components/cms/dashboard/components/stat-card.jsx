@@ -10,28 +10,32 @@ export function StatCard({
   isLoading = false,
 }) {
   return (
-    <div className="rounded-lg border bg-card p-4 sm:p-6 shadow-sm">
+    <div className="rounded-xl border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden group">
+      <div className="absolute inset-0 w-1 bg-gradient-to-b from-primary/60 to-primary/10 group-hover:w-1.5 transition-all duration-200"></div>
+
       <div className="flex flex-row items-center justify-between space-y-0 pb-2">
         {isLoading ? (
           <Skeleton className="h-4 w-24" />
         ) : (
-          <h3 className="text-sm font-medium tracking-tight">{title}</h3>
+          <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
         )}
         {isLoading ? (
-          <Skeleton className="h-5 w-5 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
         ) : (
-          <Icon className={`h-5 w-5 ${iconColor}`} />
+          <div className={`p-2 rounded-full bg-${iconColor.split("-")[1]}-50`}>
+            <Icon className={`h-5 w-5 ${iconColor}`} />
+          </div>
         )}
       </div>
       {isLoading ? (
-        <Skeleton className="h-7 w-16 mt-2" />
+        <Skeleton className="h-9 w-24 mt-3" />
       ) : (
-        <div className="text-xl sm:text-2xl font-bold">{value}</div>
+        <div className="text-2xl sm:text-3xl font-bold mt-2">{value}</div>
       )}
       {isLoading ? (
-        <Skeleton className="h-3 w-32 mt-2" />
+        <Skeleton className="h-3 w-32 mt-3" />
       ) : (
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="text-xs text-muted-foreground mt-2">{description}</p>
       )}
     </div>
   );

@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Loader2,
@@ -210,7 +209,7 @@ export default function ProjectForm({ project = null, onSuccess }) {
         type="button"
         variant="ghost"
         onClick={() => router.push("/admin/projects")}
-        className="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -230,263 +229,281 @@ export default function ProjectForm({ project = null, onSuccess }) {
         Kembali ke Daftar Proyek
       </Button>
 
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-primary/10 rounded-full">
-            <FileTextIcon className="h-5 w-5 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold">
-            {isEditMode ? "Edit Proyek" : "Tambah Proyek Baru"}
-          </h1>
-        </div>
-        <p className="text-muted-foreground ml-10">
-          {isEditMode
-            ? "Perbarui detail proyek yang sudah ada"
-            : "Isi formulir di bawah ini untuk membuat proyek baru"}
-        </p>
-      </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-lg font-semibold mb-4">Informasi Dasar</h2>
-              <div className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <RequiredLabel>Nama Proyek</RequiredLabel>
-                      </FormLabel>
-                      <div className="relative">
-                        <BuildingIcon className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
-                        <FormControl>
-                          <Input
-                            placeholder="Masukkan nama proyek"
-                            {...field}
-                            disabled={isLoading}
-                            className="pl-9"
-                          />
-                        </FormControl>
-                      </div>
-                      <FormDescription>
-                        Nama lengkap proyek yang akan dikerjakan
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="initiator"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <RequiredLabel>Initiator</RequiredLabel>
-                      </FormLabel>
-                      <div className="relative">
-                        <BuildingIcon className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
-                        <FormControl>
-                          <Input
-                            placeholder="Masukkan nama initiator"
-                            {...field}
-                            disabled={isLoading}
-                            className="pl-9"
-                          />
-                        </FormControl>
-                      </div>
-                      <FormDescription>
-                        Nama perusahaan/instansi pemrakarsa
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="period"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <RequiredLabel>Periode</RequiredLabel>
-                      </FormLabel>
-                      <div className="relative">
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value?.toString()}
-                          disabled={isLoading}
-                        >
-                          <FormControl>
-                            <div className="relative">
-                              <CalendarIcon className="h-4 w-4 absolute left-3 top-2.5 text-muted-foreground z-10" />
-                              <SelectTrigger className="pl-9">
-                                <SelectValue placeholder="Pilih tahun periode" />
-                              </SelectTrigger>
-                            </div>
-                          </FormControl>
-                          <SelectContent>
-                            {years.map((year) => (
-                              <SelectItem key={year} value={year.toString()}>
-                                {year}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <FormDescription>
-                        Tahun pelaksanaan proyek
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            <Separator />
-
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">
-                  <RequiredLabel>Layanan</RequiredLabel>
+          <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+            {/* Header */}
+            <div className="p-6 border-b bg-muted/10">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-full">
+                  <FileTextIcon className="h-5 w-5 text-primary" />
+                </div>
+                <h2 className="text-xl font-bold">
+                  {isEditMode ? "Edit Proyek" : "Tambah Proyek Baru"}
                 </h2>
-                <Badge
-                  variant={selectedServicesCount > 0 ? "default" : "outline"}
-                  className="ml-2"
-                >
-                  {selectedServicesCount} dipilih
-                </Badge>
               </div>
-
-              <FormField
-                control={form.control}
-                name="services"
-                render={() => (
-                  <FormItem>
-                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
-                      <ListChecksIcon className="h-4 w-4" />
-                      <span>
-                        Pilih minimal 1 layanan yang terkait dengan proyek ini
-                      </span>
-                    </div>
-
-                    {isLoadingServices ? (
-                      <div className="flex flex-col items-center justify-center py-8 bg-muted/30 rounded-md border border-dashed">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary/70 mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          Memuat data layanan...
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="border rounded-md p-2 max-h-[320px]">
-                        <ScrollArea className="h-full pr-4">
-                          <div className="grid grid-cols-1 gap-3 p-1">
-                            {services.map((service) => (
-                              <FormField
-                                key={service.id}
-                                control={form.control}
-                                name="services"
-                                render={({ field }) => {
-                                  return (
-                                    <FormItem
-                                      key={service.id}
-                                      className={`flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 ${
-                                        field.value?.includes(
-                                          service.id.toString()
-                                        )
-                                          ? "bg-primary/5 border-primary/30"
-                                          : "hover:bg-muted/30"
-                                      }`}
-                                    >
-                                      <FormControl>
-                                        <Checkbox
-                                          checked={field.value?.includes(
-                                            service.id.toString()
-                                          )}
-                                          onCheckedChange={(checked) => {
-                                            const serviceId =
-                                              service.id.toString();
-                                            return checked
-                                              ? field.onChange([
-                                                  ...field.value,
-                                                  serviceId,
-                                                ])
-                                              : field.onChange(
-                                                  field.value?.filter(
-                                                    (value) =>
-                                                      value !== serviceId
-                                                  )
-                                                );
-                                          }}
-                                          disabled={isLoading}
-                                          className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
-                                        />
-                                      </FormControl>
-                                      <div className="space-y-1 leading-none flex-1">
-                                        <FormLabel className="text-sm font-medium cursor-pointer">
-                                          {service.name}
-                                        </FormLabel>
-                                      </div>
-                                    </FormItem>
-                                  );
-                                }}
-                              />
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      </div>
-                    )}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <Separator />
-
-            <div>
-              <h2 className="text-lg font-semibold mb-4">Informasi Tambahan</h2>
-
-              <FormField
-                control={form.control}
-                name="photo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL Foto</FormLabel>
-                    <div className="relative">
-                      <ImageIcon className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
-                      <FormControl>
-                        <Input
-                          placeholder="Masukkan URL foto (opsional)"
-                          {...field}
-                          disabled={isLoading}
-                          className="pl-9"
-                        />
-                      </FormControl>
-                    </div>
-                    <FormDescription>
-                      URL foto untuk menampilkan gambar proyek (opsional)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-800 border border-amber-200 rounded-md text-sm">
-              <AlertCircleIcon className="h-5 w-5 flex-shrink-0" />
-              <p>
-                Kolom dengan tanda{" "}
-                <span className="text-destructive font-medium">*</span> wajib
-                diisi
+              <p className="text-muted-foreground ml-10 mt-1">
+                {isEditMode
+                  ? "Perbarui detail proyek yang sudah ada"
+                  : "Isi formulir di bawah ini untuk membuat proyek baru"}
               </p>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 pb-8 border-t">
+            {/* Form Content */}
+            <div className="p-6">
+              <div className="space-y-8">
+                {/* Basic Information */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <BuildingIcon className="h-4 w-4 text-primary" />
+                    Informasi Dasar
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            <RequiredLabel>Nama Proyek</RequiredLabel>
+                          </FormLabel>
+                          <div className="relative">
+                            <BuildingIcon className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
+                            <FormControl>
+                              <Input
+                                placeholder="Masukkan nama proyek"
+                                {...field}
+                                disabled={isLoading}
+                                className="pl-9"
+                              />
+                            </FormControl>
+                          </div>
+                          <FormDescription>
+                            Nama lengkap proyek yang akan dikerjakan
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="initiator"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            <RequiredLabel>Initiator</RequiredLabel>
+                          </FormLabel>
+                          <div className="relative">
+                            <BuildingIcon className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
+                            <FormControl>
+                              <Input
+                                placeholder="Masukkan nama initiator"
+                                {...field}
+                                disabled={isLoading}
+                                className="pl-9"
+                              />
+                            </FormControl>
+                          </div>
+                          <FormDescription>
+                            Nama perusahaan/instansi pemrakarsa
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="period"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            <RequiredLabel>Periode</RequiredLabel>
+                          </FormLabel>
+                          <div className="relative">
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value?.toString()}
+                              disabled={isLoading}
+                            >
+                              <FormControl>
+                                <div className="relative">
+                                  <CalendarIcon className="h-4 w-4 absolute left-3 top-2.5 text-muted-foreground z-10" />
+                                  <SelectTrigger className="pl-9">
+                                    <SelectValue placeholder="Pilih tahun periode" />
+                                  </SelectTrigger>
+                                </div>
+                              </FormControl>
+                              <SelectContent>
+                                {years.map((year) => (
+                                  <SelectItem
+                                    key={year}
+                                    value={year.toString()}
+                                  >
+                                    {year}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <FormDescription>
+                            Tahun pelaksanaan proyek
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Services Section */}
+                <div className="pt-4 border-t">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <ListChecksIcon className="h-4 w-4 text-primary" />
+                      <RequiredLabel>Layanan</RequiredLabel>
+                    </h3>
+                    <Badge
+                      variant={
+                        selectedServicesCount > 0 ? "default" : "outline"
+                      }
+                    >
+                      {selectedServicesCount} dipilih
+                    </Badge>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="services"
+                    render={() => (
+                      <FormItem>
+                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
+                          <span>
+                            Pilih minimal 1 layanan yang terkait dengan proyek
+                            ini
+                          </span>
+                        </div>
+
+                        {isLoadingServices ? (
+                          <div className="flex flex-col items-center justify-center py-8 bg-muted/10 rounded-md border border-dashed">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary/70 mb-2" />
+                            <p className="text-sm text-muted-foreground">
+                              Memuat data layanan...
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="border rounded-md p-2 max-h-[320px] bg-white">
+                            <ScrollArea className="h-full pr-4">
+                              <div className="grid grid-cols-1 gap-3 p-1">
+                                {services.map((service) => (
+                                  <FormField
+                                    key={service.id}
+                                    control={form.control}
+                                    name="services"
+                                    render={({ field }) => {
+                                      return (
+                                        <FormItem
+                                          key={service.id}
+                                          className={`flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 ${
+                                            field.value?.includes(
+                                              service.id.toString()
+                                            )
+                                              ? "bg-primary/5 border-primary/30"
+                                              : "hover:bg-muted/20"
+                                          }`}
+                                        >
+                                          <FormControl>
+                                            <Checkbox
+                                              checked={field.value?.includes(
+                                                service.id.toString()
+                                              )}
+                                              onCheckedChange={(checked) => {
+                                                const serviceId =
+                                                  service.id.toString();
+                                                return checked
+                                                  ? field.onChange([
+                                                      ...field.value,
+                                                      serviceId,
+                                                    ])
+                                                  : field.onChange(
+                                                      field.value?.filter(
+                                                        (value) =>
+                                                          value !== serviceId
+                                                      )
+                                                    );
+                                              }}
+                                              disabled={isLoading}
+                                              className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                                            />
+                                          </FormControl>
+                                          <div className="space-y-1 leading-none flex-1">
+                                            <FormLabel className="text-sm font-medium cursor-pointer">
+                                              {service.name}
+                                            </FormLabel>
+                                          </div>
+                                        </FormItem>
+                                      );
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            </ScrollArea>
+                          </div>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Additional Information */}
+                <div className="pt-4 border-t">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4 text-primary" />
+                    Informasi Tambahan
+                  </h3>
+
+                  <FormField
+                    control={form.control}
+                    name="photo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL Foto</FormLabel>
+                        <div className="relative">
+                          <ImageIcon className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
+                          <FormControl>
+                            <Input
+                              placeholder="Masukkan URL foto (opsional)"
+                              {...field}
+                              disabled={isLoading}
+                              className="pl-9"
+                            />
+                          </FormControl>
+                        </div>
+                        <FormDescription>
+                          URL foto untuk menampilkan gambar proyek (opsional)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Required Fields Note */}
+                <div className="flex items-center gap-2 p-4 bg-amber-50 text-amber-800 border border-amber-200 rounded-md text-sm">
+                  <AlertCircleIcon className="h-5 w-5 flex-shrink-0" />
+                  <p>
+                    Kolom dengan tanda{" "}
+                    <span className="text-destructive font-medium">*</span>{" "}
+                    wajib diisi
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Form Footer */}
+            <div className="flex justify-end gap-3 p-6 border-t bg-muted/5">
               <Button
                 type="button"
                 variant="outline"

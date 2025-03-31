@@ -8,17 +8,15 @@ export const metadata = {
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight font-[family-name:var(--font-montserrat)]">
-          Dashboard
-        </h1>
-        <p className="text-muted-foreground mt-2 font-[family-name:var(--font-plus-jakarta-sans)]">
-          Kelola semua proyek konsultasi lingkungan dari satu tempat.
-        </p>
+    <div className="bg-white p-6 rounded-xl shadow-sm border mb-6">
+      <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
+      <p className="text-muted-foreground">
+        Kelola semua proyek konsultasi lingkungan PT Mangala Dipa dari satu
+        tempat
+      </p>
+      <div className="mt-6">
+        <ProjectDashboard />
       </div>
-
-      <ProjectDashboard />
     </div>
   );
 }

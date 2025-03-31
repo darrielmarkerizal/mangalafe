@@ -5,12 +5,16 @@ import { toast } from "sonner";
 import axios from "axios";
 import { ProjectTableDashboard } from "./project-table-dashboard";
 import { Button } from "@/components/ui/button";
-import { ArrowRightIcon, RefreshCwIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  RefreshCwIcon,
+  FileTextIcon,
+  PlusIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { StatCard } from "@/components/cms/dashboard/components/stat-card";
 import {
-  FileTextIcon,
   MapIcon,
   ClipboardCheckIcon,
   ActivityIcon,
@@ -170,9 +174,19 @@ export function ProjectDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header with summary */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <h1 className="text-2xl font-bold mb-2">Dashboard Proyek</h1>
+        <p className="text-muted-foreground">
+          Ringkasan data proyek PT Mangala Dipa. Total{" "}
+          {isLoading ? "..." : statsData[0]?.value || 0} proyek tercatat dalam
+          sistem.
+        </p>
+      </div>
+
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
         {statsData.length > 0
           ? statsData.map((stat, index) => (
               <StatCard
@@ -198,25 +212,35 @@ export function ProjectDashboard() {
                   isLoading={true}
                 />
               ))}
-        <div className="col-span-1 md:hidden"></div>
       </div>
 
       {/* Project Table Section */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Proyek Terbaru</h2>
-          <div className="flex gap-2">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <FileTextIcon className="h-5 w-5 text-primary" />
+            Proyek Terbaru
+          </h2>
+          <div className="flex gap-3">
             <Button
               variant="outline"
               size="sm"
               onClick={fetchDashboardData}
               disabled={isLoading}
+              className="gap-2"
             >
               <RefreshCwIcon
                 className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
               />
-              <span className="ml-2 hidden sm:inline">Refresh</span>
+              <span className="hidden sm:inline">Refresh</span>
             </Button>
+
+            <Link href="/admin/projects/create">
+              <Button variant="default" size="sm" className="gap-2">
+                <PlusIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">Proyek Baru</span>
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -228,11 +252,14 @@ export function ProjectDashboard() {
           onDelete={handleDeleteProject}
         />
 
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-end mt-6">
           <Link href="/admin/projects">
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 transition-all hover:pr-5"
+            >
               Lihat Semua Proyek
-              <ArrowRightIcon className="h-4 w-4" />
+              <ArrowRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
         </div>
