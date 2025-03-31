@@ -34,16 +34,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
+import Cookies from "js-cookie";
 export default function ProjectPage() {
   const router = useRouter();
   const [projects, setProjects] = useState([]);
@@ -66,7 +58,6 @@ export default function ProjectPage() {
   const [serviceFilter, setServiceFilter] = useState("all_services");
   const [availableServices, setAvailableServices] = useState([]);
 
-  // Generate a range of years from 2000 to current year (without future years)
   const currentYear = new Date().getFullYear();
   const availableYears = Array.from(
     { length: currentYear - 2000 + 1 },
@@ -226,12 +217,12 @@ export default function ProjectPage() {
   const confirmDelete = async () => {
     setIsLoading(true);
     try {
-      // Get token from cookie instead of  for better security
-      // This assumes you have a js-cookie or similar library
-      const token = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("token="))
-        ?.split("=")[1];
+      const token = Cookies.get("token");
+
+      if (!token) {
+        toast.error("Sesi anda telah berakhir, silakan login kembali");
+        return; // Hentikan eksekusi jika token tidak ada
+      }
 
       const response = await axios.delete(
         `/api/project?id=${projectToDelete}`,

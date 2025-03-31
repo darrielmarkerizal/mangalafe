@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
+import Cookies from "js-cookie";
 
 export function ProjectDetail({ project, onEdit, onBack }) {
   const router = useRouter();
@@ -48,10 +49,13 @@ export function ProjectDetail({ project, onEdit, onBack }) {
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const token = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("token="))
-        ?.split("=")[1];
+      const token = Cookies.get("token");
+
+      if (!token) {
+        toast.error("Sesi anda telah berakhir, silakan login kembali");
+        router.push("/admin");
+        return;
+      }
 
       const response = await axios.delete(`/api/project?id=${project.id}`, {
         headers: {
