@@ -259,165 +259,148 @@ export default function ProjectPage() {
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight font-[family-name:var(--font-montserrat)]">
-          Proyek
-        </h1>
-        <p className="text-muted-foreground mt-2 font-[family-name:var(--font-plus-jakarta-sans)]">
-          Kelola semua proyek konsultasi lingkungan.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <form onSubmit={handleSearch} className="flex gap-2 w-full sm:w-auto">
-            <div className="relative flex-1 sm:flex-initial">
-              <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+    <div className="space-y-6">
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+        {/* Search and Filter Section */}
+        <div className="p-5 border-b">
+          <form onSubmit={handleSearch} className="flex gap-2 w-full">
+            <div className="relative flex-1">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Cari proyek atau layanan..."
-                className="pl-8 w-full sm:w-[300px]"
+                className="pl-9 h-10 bg-muted/20"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button type="submit" variant="secondary">
+            <Button type="submit" variant="secondary" className="h-10">
               Cari
             </Button>
             <Button
               type="button"
-              variant="outline"
+              variant={showFilters ? "default" : "outline"}
               size="icon"
+              className="h-10 w-10"
               onClick={() => setShowFilters(!showFilters)}
             >
               <FilterIcon className="h-4 w-4" />
             </Button>
           </form>
-
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fetchProjects()}
-              disabled={isLoading}
-            >
-              <RefreshCwIcon
-                className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
-              />
-              Refresh
-            </Button>
-            <Button
-              onClick={() => router.push("/admin/projects/create")}
-              size="sm"
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Tambah Proyek
-            </Button>
-          </div>
         </div>
 
+        {/* Active Filters */}
+        {(yearFilter !== "all_years" || serviceFilter !== "all_services") && (
+          <div className="flex items-center gap-2 p-3 bg-muted/10 border-b">
+            <span className="text-sm text-muted-foreground">Filter aktif:</span>
+            <div className="flex flex-wrap gap-2">
+              {yearFilter !== "all_years" && (
+                <Badge variant="secondary" className="gap-1 px-2 py-1">
+                  Tahun: {yearFilter}
+                  <XIcon
+                    className="h-3 w-3 ml-1 cursor-pointer"
+                    onClick={() => {
+                      setYearFilter("all_years");
+                      fetchProjects({
+                        period: "",
+                        service:
+                          serviceFilter === "all_services" ? "" : serviceFilter,
+                      });
+                    }}
+                  />
+                </Badge>
+              )}
+              {serviceFilter !== "all_services" && (
+                <Badge variant="secondary" className="gap-1 px-2 py-1">
+                  Layanan:{" "}
+                  {
+                    availableServices.find(
+                      (s) => s.id.toString() === serviceFilter
+                    )?.name
+                  }
+                  <XIcon
+                    className="h-3 w-3 ml-1 cursor-pointer"
+                    onClick={() => {
+                      setServiceFilter("all_services");
+                      fetchProjects({
+                        period: yearFilter === "all_years" ? "" : yearFilter,
+                        service: "",
+                      });
+                    }}
+                  />
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Advanced Filter Panel */}
         {showFilters && (
-          <Card className="shadow-md border border-slate-200">
-            <CardHeader className="pb-3 border-b">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg font-medium">
-                  <FilterIcon className="h-4 w-4 inline-block mr-2 text-muted-foreground" />
-                  Filter Proyek
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowFilters(false)}
-                  className="rounded-full h-8 w-8 p-0"
-                >
-                  <XIcon className="h-4 w-4" />
-                  <span className="sr-only">Close</span>
-                </Button>
-              </div>
-              <CardDescription>
-                Pilih opsi filter untuk menyaring proyek berdasarkan tahun dan
-                layanan
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="pt-4 pb-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <div className="flex items-center mb-1.5">
-                    <span className="text-sm font-medium">Tahun Proyek</span>
-                    {yearFilter !== "all_years" && (
-                      <Badge
-                        variant="outline"
-                        className="ml-2 text-xs font-normal"
-                      >
-                        {yearFilter}
-                      </Badge>
-                    )}
-                  </div>
-                  <Select value={yearFilter} onValueChange={setYearFilter}>
-                    <SelectTrigger className="bg-white">
-                      <SelectValue placeholder="Pilih tahun" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all_years">Semua Tahun</SelectItem>
-                      {availableYears.map((year) => (
-                        <SelectItem key={year} value={year.toString()}>
-                          {year}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Filter berdasarkan tahun periode proyek
-                  </p>
+          <div className="p-5 bg-muted/5 border-b">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center mb-1.5">
+                  <span className="text-sm font-medium">Tahun Proyek</span>
+                  {yearFilter !== "all_years" && (
+                    <Badge
+                      variant="outline"
+                      className="ml-2 text-xs font-normal"
+                    >
+                      {yearFilter}
+                    </Badge>
+                  )}
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center mb-1.5">
-                    <span className="text-sm font-medium">Jenis Layanan</span>
-                    {serviceFilter !== "all_services" && (
-                      <Badge
-                        variant="outline"
-                        className="ml-2 text-xs font-normal truncate max-w-[200px]"
-                      >
-                        {
-                          availableServices.find(
-                            (s) => s.id.toString() === serviceFilter
-                          )?.name
-                        }
-                      </Badge>
-                    )}
-                  </div>
-                  <Select
-                    value={serviceFilter}
-                    onValueChange={setServiceFilter}
-                  >
-                    <SelectTrigger className="bg-white">
-                      <SelectValue placeholder="Pilih layanan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all_services">
-                        Semua Layanan
+                <Select value={yearFilter} onValueChange={setYearFilter}>
+                  <SelectTrigger className="bg-white">
+                    <SelectValue placeholder="Pilih tahun" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all_years">Semua Tahun</SelectItem>
+                    {availableYears.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
                       </SelectItem>
-                      {availableServices.map((service) => (
-                        <SelectItem
-                          key={service.id}
-                          value={service.id.toString()}
-                        >
-                          {service.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Filter berdasarkan jenis layanan proyek
-                  </p>
-                </div>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </CardContent>
 
-            <CardFooter className="flex justify-end gap-3 pt-3 pb-4 border-t mt-4">
+              <div className="space-y-2">
+                <div className="flex items-center mb-1.5">
+                  <span className="text-sm font-medium">Jenis Layanan</span>
+                  {serviceFilter !== "all_services" && (
+                    <Badge
+                      variant="outline"
+                      className="ml-2 text-xs font-normal truncate max-w-[200px]"
+                    >
+                      {
+                        availableServices.find(
+                          (s) => s.id.toString() === serviceFilter
+                        )?.name
+                      }
+                    </Badge>
+                  )}
+                </div>
+                <Select value={serviceFilter} onValueChange={setServiceFilter}>
+                  <SelectTrigger className="bg-white">
+                    <SelectValue placeholder="Pilih layanan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all_services">Semua Layanan</SelectItem>
+                    {availableServices.map((service) => (
+                      <SelectItem
+                        key={service.id}
+                        value={service.id.toString()}
+                      >
+                        {service.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
               <Button
                 variant="outline"
                 onClick={handleResetFilters}
@@ -433,59 +416,16 @@ export default function ProjectPage() {
               >
                 Terapkan Filter
               </Button>
-            </CardFooter>
-          </Card>
-        )}
-
-        {(yearFilter !== "all_years" || serviceFilter !== "all_services") && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Filter aktif:</span>
-            <div className="flex flex-wrap gap-2">
-              {yearFilter !== "all_years" && (
-                <Badge variant="secondary" className="gap-1">
-                  Tahun: {yearFilter}
-                  <XIcon
-                    className="h-3 w-3 cursor-pointer"
-                    onClick={() => {
-                      setYearFilter("all_years");
-                      fetchProjects({
-                        period: "",
-                        service:
-                          serviceFilter === "all_services" ? "" : serviceFilter,
-                      });
-                    }}
-                  />
-                </Badge>
-              )}
-              {serviceFilter !== "all_services" && (
-                <Badge variant="secondary" className="gap-1">
-                  Layanan:{" "}
-                  {
-                    availableServices.find(
-                      (s) => s.id.toString() === serviceFilter
-                    )?.name
-                  }
-                  <XIcon
-                    className="h-3 w-3 cursor-pointer"
-                    onClick={() => {
-                      setServiceFilter("all_services");
-                      fetchProjects({
-                        period: yearFilter === "all_years" ? "" : yearFilter,
-                        service: "",
-                      });
-                    }}
-                  />
-                </Badge>
-              )}
             </div>
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        {/* Sort and Pagination Controls */}
+        <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white border-b">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Sort by:</span>
+            <span className="text-sm text-muted-foreground">Urut:</span>
             <Select value={sortBy} onValueChange={handleSortChange}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[160px] bg-white">
                 <SelectValue placeholder="Urut berdasarkan" />
               </SelectTrigger>
               <SelectContent>
@@ -508,13 +448,48 @@ export default function ProjectPage() {
             </Button>
           </div>
 
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchProjects()}
+              disabled={isLoading}
+              className="h-9"
+            >
+              <RefreshCwIcon
+                className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
+            <Button
+              onClick={() => router.push("/admin/projects/create")}
+              size="sm"
+              className="h-9"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Tambah Proyek
+            </Button>
+          </div>
+        </div>
+
+        {/* Projects Table */}
+        <ProjectTableDashboard
+          projects={projects}
+          isLoading={isLoading}
+          onView={handleViewProject}
+          onEdit={handleEditProject}
+          onDelete={handleDeleteProject}
+        />
+
+        {/* Pagination Footer */}
+        <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white border-t">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Show:</span>
+            <span className="text-sm text-muted-foreground">Tampilkan:</span>
             <Select
               value={perPage.toString()}
               onValueChange={handlePerPageChange}
             >
-              <SelectTrigger className="w-[80px]">
+              <SelectTrigger className="w-[80px] bg-white">
                 <SelectValue placeholder="Per page" />
               </SelectTrigger>
               <SelectContent>
@@ -524,45 +499,44 @@ export default function ProjectPage() {
                 <SelectItem value="50">50</SelectItem>
               </SelectContent>
             </Select>
+            <span className="text-sm text-muted-foreground ml-4">
+              {metadata.totalItems > 0 ? (
+                <>
+                  Menampilkan {(currentPage - 1) * perPage + 1}-
+                  {Math.min(currentPage * perPage, metadata.totalItems)} dari{" "}
+                  {metadata.totalItems} proyek
+                </>
+              ) : (
+                "Tidak ada proyek"
+              )}
+            </span>
           </div>
-        </div>
 
-        <ProjectTableDashboard
-          projects={projects}
-          isLoading={isLoading}
-          onView={handleViewProject}
-          onEdit={handleEditProject}
-          onDelete={handleDeleteProject}
-        />
-
-        {metadata.totalPages > 0 && (
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              Menampilkan {projects.length} dari {metadata.totalItems} proyek
-            </div>
+          {metadata.totalPages > 0 && (
             <Pagination
               currentPage={currentPage}
               totalPages={metadata.totalPages}
               onPageChange={handlePageChange}
             />
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+            <AlertDialogTitle>Konfirmasi Hapus Proyek</AlertDialogTitle>
             <AlertDialogDescription>
               Apakah Anda yakin ingin menghapus proyek ini? Tindakan ini tidak
-              dapat dibatalkan.
+              dapat dibatalkan dan semua data terkait proyek akan dihapus.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               Hapus
             </AlertDialogAction>

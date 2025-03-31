@@ -22,6 +22,7 @@ import {
   UserIcon,
   CalendarIcon,
   MoreHorizontalIcon,
+  ShieldIcon,
 } from "lucide-react";
 import {
   Select,
@@ -56,6 +57,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import Cookies from "js-cookie";
+import { Badge } from "@/components/ui/badge";
 
 export default function AdminTable() {
   const router = useRouter();
@@ -233,62 +235,43 @@ export default function AdminTable() {
     return new Date(dateString).toLocaleDateString("id-ID", options);
   };
 
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight font-[family-name:var(--font-montserrat)]">
-          Admin
-        </h1>
-        <p className="text-muted-foreground mt-2 font-[family-name:var(--font-plus-jakarta-sans)]">
-          Kelola pengguna admin untuk sistem manajemen proyek.
-        </p>
-      </div>
+  // Format short date
+  const formatShortDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <form onSubmit={handleSearch} className="flex gap-2 w-full sm:w-auto">
-            <div className="relative flex-1 sm:flex-initial">
-              <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+        {/* Search Section */}
+        <div className="p-5 border-b">
+          <form onSubmit={handleSearch} className="flex gap-2 w-full">
+            <div className="relative flex-1">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Cari admin..."
-                className="pl-8 w-full sm:w-[300px]"
+                placeholder="Cari admin berdasarkan nama atau email..."
+                className="pl-9 h-10 bg-muted/20"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button type="submit" variant="secondary">
+            <Button type="submit" variant="secondary" className="h-10">
               Cari
             </Button>
           </form>
-
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fetchAdmins()}
-              disabled={isLoading}
-            >
-              <RefreshCwIcon
-                className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
-              />
-              Refresh
-            </Button>
-            <Button
-              onClick={() => router.push("/admin/users/create")}
-              size="sm"
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Tambah Admin
-            </Button>
-          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        {/* Sort and Action Controls */}
+        <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white border-b">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Sort by:</span>
+            <span className="text-sm text-muted-foreground">Urut:</span>
             <Select value={sortBy} onValueChange={handleSortChange}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[160px] bg-white">
                 <SelectValue placeholder="Urut berdasarkan" />
               </SelectTrigger>
               <SelectContent>
@@ -311,13 +294,184 @@ export default function AdminTable() {
             </Button>
           </div>
 
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchAdmins()}
+              disabled={isLoading}
+              className="h-9"
+            >
+              <RefreshCwIcon
+                className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
+            <Button
+              onClick={() => router.push("/admin/users/create")}
+              size="sm"
+              className="h-9"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Tambah Admin
+            </Button>
+          </div>
+        </div>
+
+        {/* Admin Table */}
+        <Table>
+          <TableHeader className="bg-muted/30 hover:bg-muted/30">
+            <TableRow>
+              <TableHead className="w-[50px] font-semibold">No</TableHead>
+              <TableHead className="font-semibold">Nama</TableHead>
+              <TableHead className="font-semibold">Email</TableHead>
+              <TableHead className="font-semibold">Tanggal Dibuat</TableHead>
+              <TableHead className="font-semibold">
+                Terakhir Diperbarui
+              </TableHead>
+              <TableHead className="text-right font-semibold">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              // Loading skeleton
+              Array.from({ length: 5 }).map((_, index) => (
+                <TableRow
+                  key={`skeleton-${index}`}
+                  className="hover:bg-muted/5"
+                >
+                  <TableCell>
+                    <Skeleton className="h-5 w-8" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-9 w-9 rounded-full" />
+                      <Skeleton className="h-5 w-[120px]" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-[180px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-[100px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-[100px]" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : admins.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="h-52 text-center py-10 text-muted-foreground"
+                >
+                  <div className="flex flex-col items-center justify-center space-y-3">
+                    <div className="relative w-16 h-16 flex items-center justify-center rounded-full bg-muted">
+                      <UserIcon className="h-8 w-8 text-muted-foreground/80" />
+                      <div className="absolute top-0 right-0 w-4 h-4 bg-muted-foreground/30 rounded-full flex items-center justify-center">
+                        <span className="text-background text-[10px] font-bold">
+                          ?
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-1 text-center max-w-sm">
+                      <p className="font-medium text-base">
+                        Tidak ada data admin
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Semua pengguna admin yang ditambahkan akan muncul di
+                        sini
+                      </p>
+                    </div>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              admins.map((admin, index) => {
+                const rowNumber = (currentPage - 1) * perPage + index + 1;
+                return (
+                  <TableRow
+                    key={admin.id}
+                    className="group cursor-pointer hover:bg-muted/5"
+                  >
+                    <TableCell className="font-medium text-muted-foreground">
+                      {rowNumber}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                          <UserIcon className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-primary/90">
+                            {admin.full_name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Admin
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <MailIcon className="h-4 w-4 text-muted-foreground" />
+                        <span>{admin.email}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className="bg-muted/20 font-normal"
+                      >
+                        {formatShortDate(admin.createdAt)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{formatShortDate(admin.updatedAt)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-full bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700"
+                          onClick={() => handleEditAdmin(admin)}
+                        >
+                          <EditIcon className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-full bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700"
+                          onClick={() => handleDeleteAdmin(admin.id)}
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                          <span className="sr-only">Hapus</span>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+
+        {/* Pagination Footer */}
+        <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white border-t">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Show:</span>
+            <span className="text-sm text-muted-foreground">Tampilkan:</span>
             <Select
               value={perPage.toString()}
               onValueChange={handlePerPageChange}
             >
-              <SelectTrigger className="w-[80px]">
+              <SelectTrigger className="w-[80px] bg-white">
                 <SelectValue placeholder="Per page" />
               </SelectTrigger>
               <SelectContent>
@@ -327,151 +481,44 @@ export default function AdminTable() {
                 <SelectItem value="50">50</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-        </div>
-
-        {/* Admin Table */}
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">No</TableHead>
-                <TableHead>Nama</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Terdaftar Pada</TableHead>
-                <TableHead>Diperbarui Pada</TableHead>
-                <TableHead className="text-right">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                // Loading skeleton
-                Array.from({ length: 5 }).map((_, index) => (
-                  <TableRow key={`skeleton-${index}`}>
-                    <TableCell>
-                      <Skeleton className="h-5 w-8" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-[200px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-[180px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-[150px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-[150px]" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="h-9 w-9 ml-auto" />
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : admins.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-center h-32 text-muted-foreground"
-                  >
-                    Tidak ada data admin yang ditemukan.
-                  </TableCell>
-                </TableRow>
+            <span className="text-sm text-muted-foreground ml-4">
+              {metadata.totalItems > 0 ? (
+                <>
+                  Menampilkan {(currentPage - 1) * perPage + 1}-
+                  {Math.min(currentPage * perPage, metadata.totalItems)} dari{" "}
+                  {metadata.totalItems} admin
+                </>
               ) : (
-                admins.map((admin, index) => {
-                  const rowNumber = (currentPage - 1) * perPage + index + 1;
-                  return (
-                    <TableRow key={admin.id}>
-                      <TableCell className="font-medium">{rowNumber}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                            <UserIcon className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                          <span>{admin.full_name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <MailIcon className="h-4 w-4 text-muted-foreground" />
-                          <span>{admin.email}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                          <span>{formatDate(admin.createdAt)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                          <span>{formatDate(admin.updatedAt)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontalIcon className="h-4 w-4" />
-                              <span className="sr-only">Aksi</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => handleEditAdmin(admin)}
-                              className="cursor-pointer"
-                            >
-                              <EditIcon className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteAdmin(admin.id)}
-                              className="cursor-pointer text-destructive focus:text-destructive"
-                            >
-                              <TrashIcon className="h-4 w-4 mr-2" />
-                              Hapus
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
+                "Tidak ada admin"
               )}
-            </TableBody>
-          </Table>
-        </div>
+            </span>
+          </div>
 
-        {metadata.totalPages > 0 && (
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              Menampilkan {admins.length} dari {metadata.totalItems} admin
-            </div>
+          {metadata.totalPages > 0 && (
             <Pagination
               currentPage={currentPage}
               totalPages={metadata.totalPages}
               onPageChange={handlePageChange}
             />
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+            <AlertDialogTitle>Konfirmasi Hapus Admin</AlertDialogTitle>
             <AlertDialogDescription>
               Apakah Anda yakin ingin menghapus admin ini? Tindakan ini tidak
-              dapat dibatalkan.
+              dapat dibatalkan dan semua akses admin ini akan dihapus.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               Hapus
             </AlertDialogAction>
