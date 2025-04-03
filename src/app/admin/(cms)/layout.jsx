@@ -15,6 +15,7 @@ import {
   ChevronRightIcon,
   SearchIcon,
   HelpCircleIcon,
+  ChevronLeftIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -28,6 +29,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
@@ -37,6 +43,7 @@ export default function AdminLayout({ children }) {
   const [userData, setUserData] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isScrolled, setIsScrolled] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     // Get user data from cookies when component mounts
@@ -48,6 +55,12 @@ export default function AdminLayout({ children }) {
       } catch (e) {
         console.error("Error parsing user data from cookie:", e);
       }
+    }
+
+    // Check if sidebar state is saved in localStorage
+    const savedSidebarState = localStorage.getItem("sidebarCollapsed");
+    if (savedSidebarState) {
+      setSidebarCollapsed(savedSidebarState === "true");
     }
 
     // Update time every minute
@@ -66,6 +79,11 @@ export default function AdminLayout({ children }) {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  // Save sidebar state to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", sidebarCollapsed.toString());
+  }, [sidebarCollapsed]);
 
   const navigation = [
     {
@@ -124,6 +142,11 @@ export default function AdminLayout({ children }) {
     if (hour < 15) return "Selamat Siang";
     if (hour < 19) return "Selamat Sore";
     return "Selamat Malam";
+  };
+
+  // Toggle sidebar collapsed state
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
   };
 
   return (
@@ -253,23 +276,44 @@ export default function AdminLayout({ children }) {
         </div>
       </div>
 
-      {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-72 lg:flex-col bg-white border-r">
-        <div className="flex h-16 shrink-0 items-center border-b px-4">
-          <Link
-            href="/admin/dashboard"
-            className="flex items-center gap-2 w-full overflow-hidden"
-          >
-            <div className="rounded-md bg-primary/10 p-1.5 flex-shrink-0">
-              <FileTextIcon className="h-5 w-5 text-primary" />
-            </div>
-            <span className="text-base font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent truncate">
-              PT Mangala Dipa Lokatara
-            </span>
-          </Link>
+      {/* Desktop sidebar - simplified toggle UX */}
+      <div
+        className={cn(
+          "hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:flex-col bg-white border-r transition-all duration-300 ease-in-out",
+          sidebarCollapsed ? "lg:w-20" : "lg:w-72"
+        )}
+      >
+        {/* Header without toggle button */}
+        <div className="flex h-16 shrink-0 items-center border-b px-4 justify-between">
+          {!sidebarCollapsed && (
+            <Link
+              href="/admin/dashboard"
+              className="flex items-center gap-2 w-full overflow-hidden"
+            >
+              <div className="rounded-md bg-primary/10 p-1.5 flex-shrink-0">
+                <FileTextIcon className="h-5 w-5 text-primary" />
+              </div>
+              <span className="text-base font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent truncate">
+                PT Mangala Dipa Lokatara
+              </span>
+            </Link>
+          )}
+
+          {sidebarCollapsed && (
+            <Link
+              href="/admin/dashboard"
+              className="mx-auto"
+              title="PT Mangala Dipa Lokatara"
+            >
+              <div className="rounded-md bg-primary/10 p-1.5 flex-shrink-0">
+                <FileTextIcon className="h-5 w-5 text-primary" />
+              </div>
+            </Link>
+          )}
         </div>
 
-        {userData && (
+        {/* User profile section - unchanged */}
+        {userData && !sidebarCollapsed && (
           <div className="px-4 py-4 border-b bg-primary/5">
             <div className="flex flex-col gap-2">
               <p className="text-xs text-muted-foreground font-medium">
@@ -292,66 +336,165 @@ export default function AdminLayout({ children }) {
           </div>
         )}
 
-        <div className="flex flex-1 flex-col gap-1 p-4">
-          <div className="text-xs uppercase text-muted-foreground tracking-wider mb-2 ml-3 font-medium">
-            Menu Utama
+        {userData && sidebarCollapsed && (
+          <div className="py-4 border-b bg-primary/5 flex justify-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Avatar className="h-10 w-10 border-2 border-primary/10 shadow-sm cursor-pointer">
+                  <AvatarFallback className="bg-gradient-to-br from-primary/90 to-primary/70 text-white">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="flex flex-col gap-1">
+                <p className="font-medium">{userData.full_name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {userData.email}
+                </p>
+              </TooltipContent>
+            </Tooltip>
           </div>
+        )}
+
+        {/* Navigation menu */}
+        <div className="flex flex-1 flex-col gap-1 p-2">
+          {!sidebarCollapsed && (
+            <div className="text-xs uppercase text-muted-foreground tracking-wider mb-2 ml-3 font-medium">
+              Menu Utama
+            </div>
+          )}
+
           {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "group flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                item.current
-                  ? "bg-gradient-to-r from-primary/90 to-primary/80 text-white shadow-sm"
-                  : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <item.icon
-                  className={cn("h-5 w-5", item.current ? "text-white" : "")}
-                />
-                {item.name}
-              </div>
-              <div className="flex items-center">
-                {item.badge && (
-                  <Badge
+            <Tooltip key={item.name}>
+              <TooltipTrigger asChild>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "group flex items-center justify-between rounded-lg transition-all duration-200",
+                    sidebarCollapsed
+                      ? "px-2 py-2.5 mx-auto w-12 h-12 hover:bg-muted/30"
+                      : "px-3 py-2.5",
+                    item.current
+                      ? "bg-gradient-to-r from-primary/90 to-primary/80 text-white shadow-sm"
+                      : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                  )}
+                >
+                  <div
                     className={cn(
-                      "text-[10px] py-0 h-4 min-w-4 flex items-center justify-center rounded-full font-medium",
-                      item.current
-                        ? "bg-white text-primary"
-                        : "bg-primary/15 text-primary"
+                      "flex items-center gap-3",
+                      sidebarCollapsed && "justify-center w-full"
                     )}
                   >
-                    {item.badge}
-                  </Badge>
-                )}
-                {item.current && (
-                  <ChevronRightIcon className="h-4 w-4 ml-2 text-white" />
-                )}
-              </div>
-            </Link>
+                    <item.icon
+                      className={cn(
+                        "h-5 w-5",
+                        item.current ? "text-white" : "",
+                        sidebarCollapsed && "mx-auto"
+                      )}
+                    />
+                    {!sidebarCollapsed && item.name}
+                  </div>
+                  {!sidebarCollapsed && (
+                    <div className="flex items-center">
+                      {item.badge && (
+                        <Badge
+                          className={cn(
+                            "text-[10px] py-0 h-4 min-w-4 flex items-center justify-center rounded-full font-medium",
+                            item.current
+                              ? "bg-white text-primary"
+                              : "bg-primary/15 text-primary"
+                          )}
+                        >
+                          {item.badge}
+                        </Badge>
+                      )}
+                      {item.current && (
+                        <ChevronRightIcon className="h-4 w-4 ml-2 text-white" />
+                      )}
+                    </div>
+                  )}
+                </Link>
+              </TooltipTrigger>
+              {sidebarCollapsed && (
+                <TooltipContent side="right">
+                  <p>{item.name}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
           ))}
 
-          <div className="mt-auto pt-6">
-            <Button
-              variant="destructive"
-              className="w-full justify-start gap-3 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border border-red-200"
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-            >
-              <LogOutIcon
-                className={`h-5 w-5 ${isLoggingOut ? "animate-spin" : ""}`}
-              />
-              {isLoggingOut ? "Keluar..." : "Keluar"}
-            </Button>
+          <div className="mt-auto">
+            {/* Toggle button - ONLY above logout */}
+            <div className="py-2 mb-3">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    onClick={toggleSidebar}
+                    className={cn(
+                      "w-full rounded-lg flex items-center justify-center gap-2 transition-all duration-200",
+                      sidebarCollapsed ? "h-10 p-0 flex-col py-2" : "h-10"
+                    )}
+                  >
+                    {sidebarCollapsed ? (
+                      <>
+                        <ChevronRightIcon className="h-4 w-4" />
+                        <span className="text-[10px]">Perluas</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronLeftIcon className="h-4 w-4" />
+                        <span className="text-xs">Tutup Sidebar</span>
+                      </>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                {sidebarCollapsed && (
+                  <TooltipContent side="right">
+                    <p>Perluas sidebar untuk navigasi lengkap</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </div>
+
+            {/* Logout button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className={cn(
+                    "justify-start gap-3 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border border-red-200",
+                    sidebarCollapsed
+                      ? "w-12 h-12 mx-auto p-0 flex items-center justify-center rounded-full"
+                      : "w-full"
+                  )}
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                >
+                  <LogOutIcon
+                    className={`h-5 w-5 ${isLoggingOut ? "animate-spin" : ""}`}
+                  />
+                  {!sidebarCollapsed && (isLoggingOut ? "Keluar..." : "Keluar")}
+                </Button>
+              </TooltipTrigger>
+              {sidebarCollapsed && (
+                <TooltipContent side="right">
+                  <p>Keluar dari sistem</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
           </div>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-72 min-h-screen flex flex-col">
-        {/* Header - both mobile and desktop */}
+      <div
+        className={cn(
+          "min-h-screen flex flex-col transition-all duration-300",
+          sidebarCollapsed ? "lg:pl-20" : "lg:pl-72"
+        )}
+      >
+        {/* Header - without toggle button */}
         <div
           className={cn(
             "sticky top-0 z-30 flex h-16 shrink-0 items-center gap-x-4 bg-white px-4 sm:px-6 transition-shadow duration-200",
