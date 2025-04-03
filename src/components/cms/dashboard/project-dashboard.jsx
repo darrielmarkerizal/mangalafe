@@ -222,7 +222,7 @@ export function ProjectDashboard() {
                 Dashboard Proyek
               </h1>
               <p className="text-muted-foreground mt-1">
-                Ringkasan data proyek PT Mangala Dipa. Total{" "}
+                Ringkasan data proyek PT Mangala Dipa Lokatara. Total{" "}
                 <span className="font-semibold text-foreground">
                   {isLoading ? "..." : statsData[0]?.value || 0}
                 </span>{" "}

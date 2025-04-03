@@ -218,7 +218,8 @@ export function LoginForm({ className, ...props }) {
           </Form>
         </CardContent>
         <div className="p-4 bg-muted/10 border-t text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} PT Mangala Dipa. All rights reserved.
+          © {new Date().getFullYear()} PT Mangala Dipa Lokatara. All rights
+          reserved.
         </div>
       </Card>
     </div>

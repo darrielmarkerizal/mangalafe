@@ -149,19 +149,22 @@ export default function AdminLayout({ children }) {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 shrink-0 items-center border-b px-6">
-          <Link href="/admin/dashboard" className="flex items-center gap-2">
-            <div className="rounded-md bg-primary/10 p-1.5">
+        <div className="flex h-16 shrink-0 items-center border-b px-4">
+          <Link
+            href="/admin/dashboard"
+            className="flex items-center gap-2 truncate"
+          >
+            <div className="rounded-md bg-primary/10 p-1.5 flex-shrink-0">
               <FileTextIcon className="h-5 w-5 text-primary" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              PT Mangala Dipa
+            <span className="text-sm font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent truncate">
+              PT Mangala Dipa Lokatara
             </span>
           </Link>
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-4 rounded-full hover:bg-muted/50"
+            className="absolute right-2 rounded-full hover:bg-muted/50"
             onClick={() => setSidebarOpen(false)}
           >
             <XIcon className="h-5 w-5" />
@@ -176,7 +179,7 @@ export default function AdminLayout({ children }) {
                 {getGreeting()}
               </p>
               <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 border-2 border-primary/10 shadow-sm">
+                <Avatar className="h-10 w-10 border-2 border-primary/10 shadow-sm flex-shrink-0">
                   <AvatarFallback className="bg-gradient-to-br from-primary/90 to-primary/70 text-white">
                     {getUserInitials()}
                   </AvatarFallback>
@@ -252,13 +255,16 @@ export default function AdminLayout({ children }) {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-72 lg:flex-col bg-white border-r">
-        <div className="flex h-16 shrink-0 items-center border-b px-6">
-          <Link href="/admin/dashboard" className="flex items-center gap-2">
-            <div className="rounded-md bg-primary/10 p-1.5">
+        <div className="flex h-16 shrink-0 items-center border-b px-4">
+          <Link
+            href="/admin/dashboard"
+            className="flex items-center gap-2 w-full overflow-hidden"
+          >
+            <div className="rounded-md bg-primary/10 p-1.5 flex-shrink-0">
               <FileTextIcon className="h-5 w-5 text-primary" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              PT Mangala Dipa
+            <span className="text-base font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent truncate">
+              PT Mangala Dipa Lokatara
             </span>
           </Link>
         </div>
@@ -270,7 +276,7 @@ export default function AdminLayout({ children }) {
                 {getGreeting()}
               </p>
               <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 border-2 border-primary/10 shadow-sm">
+                <Avatar className="h-10 w-10 border-2 border-primary/10 shadow-sm flex-shrink-0">
                   <AvatarFallback className="bg-gradient-to-br from-primary/90 to-primary/70 text-white">
                     {getUserInitials()}
                   </AvatarFallback>
@@ -374,14 +380,23 @@ export default function AdminLayout({ children }) {
           <div className="flex-1 flex justify-center lg:hidden">
             <Link
               href="/admin/dashboard"
-              className="font-semibold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent"
+              className="text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent truncate max-w-[180px]"
             >
-              PT Mangala Dipa
+              PT Mangala Dipa Lokatara
             </Link>
           </div>
 
           {/* Right nav items */}
-          <div className="flex items-center gap-x-4">
+          <div className="flex items-center gap-x-3">
+            {/* Help button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden sm:flex rounded-full h-8 w-8"
+            >
+              <HelpCircleIcon className="h-5 w-5 text-muted-foreground" />
+            </Button>
+
             {/* User dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -418,7 +433,7 @@ export default function AdminLayout({ children }) {
         </div>
 
         {/* Content area */}
-        <main className="flex-1 p-6 md:p-8 lg:p-10">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 md:p-8 lg:p-10">{children}</main>
       </div>
     </div>
   );
