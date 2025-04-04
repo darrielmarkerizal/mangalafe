@@ -1,6 +1,7 @@
 import Hero from "@/components/home/hero";
 import Keahlian from "@/components/home/keahlian";
 import Layanan from "@/components/home/layanan";
+import Tim from "@/components/home/tim";
 import Image from "next/image";
 
 export default function Home() {
@@ -9,6 +10,7 @@ export default function Home() {
       <Hero />
       <Layanan />
       <Keahlian />
+      <Tim />
     </main>
   );
 }
