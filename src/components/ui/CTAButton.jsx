@@ -1,11 +1,25 @@
 "use client";
 
-const CTAButton = ({ children, onClick, type = "button", className = "" }) => {
+const CTAButton = ({
+  children,
+  onClick,
+  type = "button",
+  variant = "white",
+  className = "",
+}) => {
+  const baseStyles =
+    "py-3 rounded-[6px] font-semibold transition-colors duration-300";
+
+  const variantStyles = {
+    white: "bg-white text-primary hover:bg-primary hover:text-white",
+    green: "bg-secondary text-primary hover:bg-primary hover:text-white",
+  };
+
   return (
     <button
       type={type}
       onClick={onClick}
-      className={`bg-secondary text-primary hover:text-white px-6 py-3 rounded-[6px] font-semibold hover:bg-primary transition-colors duration-300 ${className}`}
+      className={`${baseStyles} ${variantStyles[variant]} ${className}`}
     >
       {children}
     </button>

@@ -40,7 +40,11 @@ const Hero = () => {
           komitmen terhadap praktik terbaik lingkungan
         </p>
         <div className="inline-block">
-          <CTAButton onClick={() => console.log("Next clicked!")}>
+          <CTAButton
+            onClick={() => console.log("Next clicked!")}
+            className="px-6"
+            variant="green"
+          >
             Konsultasikan Kebutuhan Anda
           </CTAButton>
         </div>
