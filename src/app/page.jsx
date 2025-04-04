@@ -1,3 +1,4 @@
+import CTASection from "@/components/home/cta-section";
 import Hero from "@/components/home/hero";
 import Keahlian from "@/components/home/keahlian";
 import Layanan from "@/components/home/layanan";
@@ -11,6 +12,7 @@ export default function Home() {
       <Layanan />
       <Keahlian />
       <Tim />
+      <CTASection />
     </main>
   );
 }
