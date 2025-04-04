@@ -1,8 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { Montserrat, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/header/header";
-import Footer from "@/components/footer/footer";
+import LayoutWrapper from "@/components/layout/layout-wrapper";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -27,9 +26,7 @@ export default function RootLayout({ children }) {
         className={`${montserrat.variable} ${plusJakartaSans.variable} antialiased`}
         suppressHydrationWarning
       >
-        <Header/>
-        {children}
-        <Footer/>
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );
