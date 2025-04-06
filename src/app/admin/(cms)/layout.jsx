@@ -34,6 +34,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Image from "next/image";
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
@@ -177,9 +178,14 @@ export default function AdminLayout({ children }) {
             href="/admin/dashboard"
             className="flex items-center gap-2 truncate"
           >
-            <div className="rounded-md bg-primary/10 p-1.5 flex-shrink-0">
-              <FileTextIcon className="h-5 w-5 text-primary" />
-            </div>
+            <Image
+              src="/logo.svg"
+              alt="Mangala Dipa Lokatara Logo"
+              width={28}
+              height={30}
+              priority
+              className="flex-shrink-0"
+            />
             <span className="text-sm font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent truncate">
               PT Mangala Dipa Lokatara
             </span>
@@ -290,9 +296,14 @@ export default function AdminLayout({ children }) {
               href="/admin/dashboard"
               className="flex items-center gap-2 w-full overflow-hidden"
             >
-              <div className="rounded-md bg-primary/10 p-1.5 flex-shrink-0">
-                <FileTextIcon className="h-5 w-5 text-primary" />
-              </div>
+              <Image
+                src="/logo.svg"
+                alt="Mangala Dipa Lokatara Logo"
+                width={30}
+                height={33}
+                priority
+                className="flex-shrink-0"
+              />
               <span className="text-base font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent truncate">
                 PT Mangala Dipa Lokatara
               </span>
@@ -305,9 +316,13 @@ export default function AdminLayout({ children }) {
               className="mx-auto"
               title="PT Mangala Dipa Lokatara"
             >
-              <div className="rounded-md bg-primary/10 p-1.5 flex-shrink-0">
-                <FileTextIcon className="h-5 w-5 text-primary" />
-              </div>
+              <Image
+                src="/logo.svg"
+                alt="Mangala Dipa Lokatara Logo"
+                width={33}
+                height={36}
+                priority
+              />
             </Link>
           )}
         </div>
@@ -520,12 +535,18 @@ export default function AdminLayout({ children }) {
           </div>
 
           {/* Center logo - visible on mobile */}
-          <div className="flex-1 flex justify-center lg:hidden">
-            <Link
-              href="/admin/dashboard"
-              className="text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent truncate max-w-[180px]"
-            >
-              PT Mangala Dipa Lokatara
+          <div className="flex-1 flex justify-center items-center lg:hidden">
+            <Link href="/admin/dashboard" className="flex items-center gap-2">
+              <Image
+                src="/logo.svg"
+                alt="Mangala Dipa Lokatara Logo"
+                width={24}
+                height={26}
+                priority
+              />
+              <span className="text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent truncate max-w-[180px]">
+                PT Mangala Dipa Lokatara
+              </span>
             </Link>
           </div>
 
