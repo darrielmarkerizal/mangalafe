@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Service from "../../../../models/service.js";
+import User from "../../../../models/user.js";
 import nodemailer from "nodemailer";
 import { z } from "zod";
 
@@ -56,6 +57,23 @@ export async function POST(request) {
         { status: 404 }
       );
     }
+
+    // Get all admin users
+    const adminUsers = await User.findAll({
+      attributes: ["email", "full_name"],
+    });
+
+    if (!adminUsers || adminUsers.length === 0) {
+      console.warn(
+        "No admin users found in the database. Using fallback email."
+      );
+      adminUsers.push({
+        email: process.env.EMAIL_TO || "info@mangaladipalokatara.com",
+      });
+    }
+
+    // Extract admin emails
+    const adminEmails = adminUsers.map((admin) => admin.email);
 
     const fullName = `${firstName} ${lastName}`;
     const subject = `Kontak Baru: ${service.name} - ${fullName}`;
@@ -246,7 +264,7 @@ export async function POST(request) {
 
     const mailOptions = {
       from: '"PT Mangala Dipa Lokatara" <noreply@mangaladipalokatara.com>',
-      to: process.env.EMAIL_TO || "info@mangaladipalokatara.com",
+      to: adminEmails.join(", "),
       replyTo: email,
       subject: subject,
       text: textBody,

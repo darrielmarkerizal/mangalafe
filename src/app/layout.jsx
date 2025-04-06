@@ -4,13 +4,15 @@ import "./globals.css";
 import LayoutWrapper from "@/components/layout/layout-wrapper";
 
 const montserrat = Montserrat({
-  variable: "--font-montserrat",
   subsets: ["latin"],
+  display: "swap",
+  variable: "--font-montserrat",
 });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
+  display: "swap",
+  variable: "--font-plus-jakarta-sans",
 });
 
 export const metadata = {
@@ -23,9 +25,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${montserrat.variable} ${plusJakartaSans.variable} antialiased`}
+        className={`${montserrat.variable} ${plusJakartaSans.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
+        <Toaster />
         <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
