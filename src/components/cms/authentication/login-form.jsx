@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { EyeIcon, EyeOffIcon, Loader2 } from "lucide-react";
 import { UserIcon, MailIcon, LockIcon } from "lucide-react";
-
+import Image from "next/image";
 import {
   Form,
   FormControl,
@@ -27,6 +27,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { motion } from "framer-motion";
 
 export function LoginForm({ className, ...props }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -102,126 +103,162 @@ export function LoginForm({ className, ...props }) {
   };
 
   return (
-    <div className={cn("flex flex-col gap-6 w-full", className)} {...props}>
-      <Card className="w-full shadow-lg bg-white rounded-xl overflow-hidden border-0">
-        <div className="h-2 bg-primary w-full"></div>
-        <CardHeader className="space-y-2 sm:space-y-3 pt-8">
-          <div className="mx-auto mb-2">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <UserIcon className="h-8 w-8 text-primary" />
-            </div>
-          </div>
-          <CardTitle className="text-xl sm:text-2xl md:text-3xl text-center font-[family-name:var(--font-montserrat)]">
-            Login Admin
-          </CardTitle>
-          <CardDescription className="text-sm sm:text-base text-center font-[family-name:var(--font-plus-jakarta-sans)]">
-            Masukkan email dan kata sandi Anda untuk masuk ke dashboard admin
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-6 sm:p-8 font-[family-name:var(--font-plus-jakarta-sans)]">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="email"
-                rules={{
-                  required: "Email harus diisi",
-                  pattern: {
-                    value: /\S+@\S+\.\S+/,
-                    message: "Format email tidak valid",
-                  },
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm sm:text-base font-medium">
-                      Email
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <MailIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input
-                          {...field}
-                          type="email"
-                          placeholder="m@example.com"
-                          className="h-11 sm:h-12 pl-10 transition-all focus-visible:ring-primary"
-                          disabled={isLoading}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+    <div
+      className={cn("flex flex-col gap-6 w-full max-w-md mx-auto", className)}
+      {...props}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="w-full shadow-xl bg-white rounded-xl overflow-hidden border-0">
+          <div className="h-1.5 bg-gradient-to-r from-primary to-secondary w-full"></div>
+          <CardHeader className="space-y-2 sm:space-y-3 pt-8 pb-4">
+            <motion.div
+              className="mx-auto mb-4 relative"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Image
+                src="/logo.svg"
+                alt="Mangala Dipa Lokatara Logo"
+                width={60}
+                height={60}
+                className="mx-auto drop-shadow-md"
+                priority
               />
+              <div className="w-16 h-16 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary/5 rounded-full -z-10"></div>
+            </motion.div>
+            <CardTitle className="text-xl sm:text-2xl md:text-2xl text-center font-montserrat text-primary">
+              Admin Dashboard
+            </CardTitle>
+            <CardDescription className="text-sm sm:text-base text-center font-plus-jakarta-sans">
+              Masukkan kredensial Anda untuk mengakses panel admin
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-5 sm:p-7 font-plus-jakarta-sans">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-5"
+              >
+                <FormField
+                  control={form.control}
+                  name="email"
+                  rules={{
+                    required: "Email harus diisi",
+                    pattern: {
+                      value: /\S+@\S+\.\S+/,
+                      message: "Format email tidak valid",
+                    },
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-muted-foreground">
+                        Email
+                      </FormLabel>
+                      <FormControl>
+                        <motion.div
+                          className="relative"
+                          whileFocus={{ scale: 1.01 }}
+                        >
+                          <MailIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/70" />
+                          <Input
+                            {...field}
+                            type="email"
+                            placeholder="nama@contoh.com"
+                            className="h-11 pl-10 transition-all focus-visible:ring-primary/60 rounded-lg bg-muted/30 border-muted"
+                            disabled={isLoading}
+                          />
+                        </motion.div>
+                      </FormControl>
+                      <FormMessage className="text-xs font-medium" />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="password"
-                rules={{
-                  required: "Password harus diisi",
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex justify-between items-center">
-                      <FormLabel className="text-sm sm:text-base font-medium">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  rules={{
+                    required: "Password harus diisi",
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-muted-foreground">
                         Password
                       </FormLabel>
-                    </div>
-                    <FormControl>
-                      <div className="relative">
-                        <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input
-                          {...field}
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Masukkan kata sandi"
-                          className="h-11 sm:h-12 pl-10 transition-all focus-visible:ring-primary"
-                          disabled={isLoading}
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-muted/50 p-1 rounded-full transition-colors"
-                          onClick={togglePasswordVisibility}
-                          aria-label={
-                            showPassword
-                              ? "Sembunyikan kata sandi"
-                              : "Tampilkan kata sandi"
-                          }
-                          disabled={isLoading}
+                      <FormControl>
+                        <motion.div
+                          className="relative"
+                          whileFocus={{ scale: 1.01 }}
                         >
-                          {showPassword ? (
-                            <EyeOffIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
-                          ) : (
-                            <EyeIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
-                          )}
-                        </button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                          <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/70" />
+                          <Input
+                            {...field}
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            className="h-11 pl-10 transition-all focus-visible:ring-primary/60 rounded-lg bg-muted/30 border-muted"
+                            disabled={isLoading}
+                          />
+                          <motion.button
+                            type="button"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors text-muted-foreground hover:text-primary/80"
+                            onClick={togglePasswordVisibility}
+                            aria-label={
+                              showPassword
+                                ? "Sembunyikan kata sandi"
+                                : "Tampilkan kata sandi"
+                            }
+                            disabled={isLoading}
+                            whileTap={{ scale: 0.9 }}
+                            whileHover={{ backgroundColor: "rgba(0,0,0,0.05)" }}
+                          >
+                            {showPassword ? (
+                              <EyeOffIcon className="h-4 w-4" />
+                            ) : (
+                              <EyeIcon className="h-4 w-4" />
+                            )}
+                          </motion.button>
+                        </motion.div>
+                      </FormControl>
+                      <FormMessage className="text-xs font-medium" />
+                    </FormItem>
+                  )}
+                />
 
-              <Button
-                type="submit"
-                className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium shadow-sm hover:shadow transition-all"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Memproses...
-                  </>
-                ) : (
-                  "Masuk ke Dashboard"
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-        <div className="p-4 bg-muted/10 border-t text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} PT Mangala Dipa Lokatara. All rights
-          reserved.
-        </div>
-      </Card>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="pt-2"
+                >
+                  <Button
+                    type="submit"
+                    className="w-full h-11 text-sm font-medium shadow-sm hover:shadow transition-all bg-gradient-to-r from-primary to-primary/90 rounded-lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Memproses...
+                      </>
+                    ) : (
+                      "Masuk ke Dashboard"
+                    )}
+                  </Button>
+                </motion.div>
+              </form>
+            </Form>
+          </CardContent>
+          <div className="p-4 bg-muted/20 border-t text-center text-xs text-muted-foreground">
+            <p>© {new Date().getFullYear()} PT Mangala Dipa Lokatara</p>
+            <p className="text-[10px] mt-1 text-muted-foreground/80">
+              Sistem Manajemen Proyek Internal
+            </p>
+          </div>
+        </Card>
+      </motion.div>
     </div>
   );
 }

@@ -45,6 +45,9 @@
 }
 
 :root {
+  --font-sans: var(--font-plus-jakarta-sans), system-ui, sans-serif;
+  --font-heading: var(--font-montserrat), system-ui, sans-serif;
+
   --radius: 0.625rem;
   --background: #fffbec;
   --white: #fffbec;
@@ -86,5 +89,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
   }
 }
