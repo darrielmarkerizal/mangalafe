@@ -185,8 +185,7 @@ export function ProjectDashboard() {
         return;
       }
 
-      // This is the correct URL format - use query parameters instead of path parameters
-      const response = await axios.delete(`/api/project?id=${projectId}`, {
+      const response = await axios.delete(`/api/project/${projectId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
