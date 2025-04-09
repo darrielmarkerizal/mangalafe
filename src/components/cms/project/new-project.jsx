@@ -726,9 +726,36 @@ export default function ProjectForm({ project = null, onSuccess }) {
                             className={`border-2 border-dashed rounded-lg p-4 sm:p-6 ${
                               uploadError
                                 ? "border-red-300 bg-red-50"
-                                : imagePreview
-                                  ? "border-green-300 bg-green-50"
-                                  : "border-muted-foreground/25 hover:border-primary/40 bg-muted/10"
+                                : (() => {
+                                    // Check if imagePreview is valid
+                                    const isValidImageUrl = (url) => {
+                                      if (!url) return false;
+                                      if (url.startsWith("data:image/"))
+                                        return true;
+                                      if (/^[^\/]+\.[a-zA-Z]+$/.test(url))
+                                        return false;
+
+                                      try {
+                                        if (
+                                          url.startsWith("http://") ||
+                                          url.startsWith("https://")
+                                        ) {
+                                          new URL(url);
+                                          return true;
+                                        }
+                                        if (url.startsWith("/")) return true;
+                                        return false;
+                                      } catch (e) {
+                                        return false;
+                                      }
+                                    };
+
+                                    // Only apply green styling if there's a valid image URL
+                                    return imagePreview &&
+                                      isValidImageUrl(imagePreview)
+                                      ? "border-green-300 bg-green-50"
+                                      : "border-muted-foreground/25 hover:border-primary/40 bg-muted/10";
+                                  })()
                             } transition-colors`}
                             onDragOver={(e) => {
                               e.preventDefault();
@@ -751,7 +778,191 @@ export default function ProjectForm({ project = null, onSuccess }) {
                               }
                             }}
                           >
-                            {!imagePreview ? (
+                            {imagePreview ? (
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  {(() => {
+                                    const isValidImageUrl = (url) => {
+                                      if (!url) return false;
+                                      if (url.startsWith("data:image/"))
+                                        return true;
+                                      if (/^[^\/]+\.[a-zA-Z]+$/.test(url))
+                                        return false;
+
+                                      try {
+                                        if (
+                                          url.startsWith("http://") ||
+                                          url.startsWith("https://")
+                                        ) {
+                                          new URL(url);
+                                          return true;
+                                        }
+                                        if (url.startsWith("/")) return true;
+                                        return false;
+                                      } catch (e) {
+                                        return false;
+                                      }
+                                    };
+
+                                    if (isValidImageUrl(imagePreview)) {
+                                      return (
+                                        <div className="flex items-center gap-2">
+                                          <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                                          <p className="text-sm font-medium text-green-600">
+                                            Foto berhasil diunggah
+                                          </p>
+                                        </div>
+                                      );
+                                    } else {
+                                      return (
+                                        <div className="flex items-center gap-2">
+                                          <AlertCircleIcon className="h-5 w-5 text-amber-600" />
+                                          <p className="text-sm font-medium text-amber-600">
+                                            Belum ada gambar valid
+                                          </p>
+                                        </div>
+                                      );
+                                    }
+                                  })()}
+
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={removeImage}
+                                    className="h-8 w-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50"
+                                  >
+                                    <XCircleIcon className="h-5 w-5" />
+                                  </Button>
+                                </div>
+
+                                <div className="relative aspect-video w-full max-w-md mx-auto overflow-hidden rounded-md border">
+                                  {(() => {
+                                    const isValidImageUrl = (url) => {
+                                      if (!url) return false;
+                                      if (url.startsWith("data:image/"))
+                                        return true;
+                                      if (/^[^\/]+\.[a-zA-Z]+$/.test(url))
+                                        return false;
+
+                                      try {
+                                        if (
+                                          url.startsWith("http://") ||
+                                          url.startsWith("https://")
+                                        ) {
+                                          new URL(url);
+                                          return true;
+                                        }
+                                        if (url.startsWith("/")) return true;
+                                        return false;
+                                      } catch (e) {
+                                        return false;
+                                      }
+                                    };
+
+                                    if (isValidImageUrl(imagePreview)) {
+                                      if (imagePreview.startsWith("data:")) {
+                                        return (
+                                          <Image
+                                            src={imagePreview}
+                                            alt="Preview"
+                                            fill
+                                            className="object-cover"
+                                          />
+                                        );
+                                      } else {
+                                        return (
+                                          <div className="relative w-full h-full">
+                                            <img
+                                              src={imagePreview}
+                                              alt="Preview"
+                                              className="absolute inset-0 w-full h-full object-cover"
+                                              onError={(e) => {
+                                                console.log(
+                                                  "Image load error, showing 'No Image' message"
+                                                );
+                                                e.target.parentNode.innerHTML = `
+                                                  <div class="flex items-center justify-center h-full w-full bg-muted/20">
+                                                    <p class="text-muted-foreground text-center flex flex-col items-center">
+                                                      <span class="text-3xl mb-2">📷</span>
+                                                      <span>Tidak ada gambar</span>
+                                                    </p>
+                                                  </div>
+                                                `;
+                                              }}
+                                            />
+                                            {(() => {
+                                              try {
+                                                const url = new URL(
+                                                  imagePreview
+                                                );
+                                                return (
+                                                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 text-center">
+                                                    Image from: {url.hostname}
+                                                  </div>
+                                                );
+                                              } catch (e) {
+                                                return null;
+                                              }
+                                            })()}
+                                          </div>
+                                        );
+                                      }
+                                    } else {
+                                      // For invalid image URL, just show "Tidak ada gambar"
+                                      return (
+                                        <div className="flex flex-col items-center justify-center h-full w-full bg-muted/20">
+                                          <p className="text-muted-foreground text-center flex flex-col items-center">
+                                            <span className="text-3xl mb-2">
+                                              📷
+                                            </span>
+                                            <span>Tidak ada gambar</span>
+                                          </p>
+                                        </div>
+                                      );
+                                    }
+                                  })()}
+                                </div>
+
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => fileInputRef.current?.click()}
+                                  disabled={uploadingImage || isLoading}
+                                  className="mt-2"
+                                >
+                                  <UploadIcon className="mr-2 h-4 w-4" />
+                                  {(() => {
+                                    const isValidImageUrl = (url) => {
+                                      if (!url) return false;
+                                      if (url.startsWith("data:image/"))
+                                        return true;
+                                      if (/^[^\/]+\.[a-zA-Z]+$/.test(url))
+                                        return false;
+
+                                      try {
+                                        if (
+                                          url.startsWith("http://") ||
+                                          url.startsWith("https://")
+                                        ) {
+                                          new URL(url);
+                                          return true;
+                                        }
+                                        if (url.startsWith("/")) return true;
+                                        return false;
+                                      } catch (e) {
+                                        return false;
+                                      }
+                                    };
+
+                                    return isValidImageUrl(imagePreview)
+                                      ? "Ganti Gambar"
+                                      : "Unggah Gambar";
+                                  })()}
+                                </Button>
+                              </div>
+                            ) : (
                               <div className="flex flex-col items-center justify-center space-y-2">
                                 <div className="p-3 bg-primary/10 rounded-full">
                                   <UploadIcon className="h-6 w-6 text-primary" />
@@ -794,65 +1005,6 @@ export default function ProjectForm({ project = null, onSuccess }) {
                                       Pilih Gambar
                                     </>
                                   )}
-                                </Button>
-                              </div>
-                            ) : (
-                              <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <CheckCircleIcon className="h-5 w-5 text-green-600" />
-                                    <p className="text-sm font-medium text-green-600">
-                                      Foto berhasil diunggah
-                                    </p>
-                                  </div>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={removeImage}
-                                    className="h-8 w-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50"
-                                  >
-                                    <XCircleIcon className="h-5 w-5" />
-                                  </Button>
-                                </div>
-
-                                <div className="relative aspect-video w-full max-w-md mx-auto overflow-hidden rounded-md border">
-                                  {imagePreview.startsWith("data:") ? (
-                                    <Image
-                                      src={imagePreview}
-                                      alt="Preview"
-                                      fill
-                                      className="object-cover"
-                                    />
-                                  ) : (
-                                    <div className="relative w-full h-full">
-                                      <img
-                                        src={imagePreview}
-                                        alt="Preview"
-                                        className="absolute inset-0 w-full h-full object-cover"
-                                        onError={(e) => {
-                                          e.target.src =
-                                            "/placeholder-image.jpg";
-                                        }}
-                                      />
-                                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 text-center">
-                                        Image from:{" "}
-                                        {new URL(imagePreview).hostname}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => fileInputRef.current?.click()}
-                                  disabled={uploadingImage || isLoading}
-                                  className="mt-2"
-                                >
-                                  <UploadIcon className="mr-2 h-4 w-4" />
-                                  Ganti Gambar
                                 </Button>
                               </div>
                             )}

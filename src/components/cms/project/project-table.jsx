@@ -225,7 +225,7 @@ export default function ProjectPage() {
 
       if (!token) {
         toast.error("Sesi anda telah berakhir, silakan login kembali");
-        return; // Hentikan eksekusi jika token tidak ada
+        return;
       }
 
       const response = await axios.delete(
@@ -598,8 +598,8 @@ export default function ProjectPage() {
               dapat dibatalkan dan semua data terkait proyek akan dihapus.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-0">
-            <AlertDialogCancel className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+          <AlertDialogFooter className="space-x-4 sm:space-x-4">
+            <AlertDialogCancel className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 mr-2">
               Batal
             </AlertDialogCancel>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

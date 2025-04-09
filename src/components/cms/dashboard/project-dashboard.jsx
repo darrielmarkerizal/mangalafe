@@ -27,6 +27,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import Cookies from "js-cookie";
 
 export function ProjectDashboard() {
   const [projects, setProjects] = useState([]);
@@ -173,24 +174,36 @@ export function ProjectDashboard() {
     router.push(`/admin/projects/${project.id}/edit`);
   };
 
-  const handleDeleteProject = async (id) => {
-    if (confirm("Apakah Anda yakin ingin menghapus proyek ini?")) {
-      try {
-        const response = await axios.delete(`/api/project/${id}`);
-        if (response.data.success) {
-          toast.success("Proyek berhasil dihapus");
-          fetchDashboardData();
-        } else {
-          toast.error("Gagal menghapus proyek", {
-            description: response.data.message,
-          });
-        }
-      } catch (error) {
-        toast.error("Terjadi kesalahan", {
-          description: "Gagal menghapus proyek. Silakan coba lagi nanti.",
-        });
-        console.error("Error deleting project:", error);
+  const handleDeleteProject = async (projectId) => {
+    console.log("Delete request for project ID:", projectId);
+
+    try {
+      const token = Cookies.get("token");
+
+      if (!token) {
+        toast.error("Sesi anda telah berakhir, silakan login kembali");
+        return;
       }
+
+      const response = await axios.delete(`/api/project/${projectId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Delete API response:", response.data);
+
+      if (response.data.success) {
+        toast.success("Proyek berhasil dihapus");
+        // Refresh project list
+        fetchDashboardData();
+      } else {
+        console.error("API returned error:", response.data.message);
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast.error(`Gagal menghapus proyek: ${error.message}`);
     }
   };
 

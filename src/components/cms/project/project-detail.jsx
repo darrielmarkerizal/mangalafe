@@ -34,6 +34,7 @@ import {
   ImageIcon,
   Loader2,
   AlertCircleIcon,
+  UploadIcon,
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
@@ -60,11 +61,13 @@ export function ProjectDetail({ project, onEdit, onBack }) {
         return;
       }
 
-      const response = await axios.delete(`/api/project?id=${project.id}`, {
+      const response = await axios.delete(`/api/project/${project.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      console.log("Delete response:", response.data);
 
       if (response.data.success) {
         toast.success("Proyek berhasil dihapus");
@@ -74,7 +77,10 @@ export function ProjectDetail({ project, onEdit, onBack }) {
       }
     } catch (error) {
       console.error("Error deleting project:", error);
-      toast.error("Gagal menghapus proyek");
+      toast.error(
+        "Gagal menghapus proyek: " +
+          (error.response?.data?.message || error.message)
+      );
     } finally {
       setIsDeleting(false);
       setShowDeleteDialog(false);
@@ -271,7 +277,7 @@ export function ProjectDetail({ project, onEdit, onBack }) {
                 </div>
 
                 {/* Photo section */}
-                {project.photo && (
+                {project.photo ? (
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -287,15 +293,122 @@ export function ProjectDetail({ project, onEdit, onBack }) {
                       whileHover={{ scale: 1.01 }}
                       className="relative overflow-hidden rounded-md border bg-muted/10 aspect-video w-full max-w-2xl mx-auto shadow-sm hover:shadow-md transition-all"
                     >
-                      <Image
-                        src={project.photo}
-                        alt={project.name}
-                        fill
-                        className="object-cover"
-                        onError={(e) => {
-                          e.target.src = "/placeholder-image.jpg"; // Provide a fallback image
-                        }}
-                      />
+                      {(() => {
+                        const isValidUrl = (url) => {
+                          try {
+                            if (!url) return false;
+
+                            // Reject common filenames without paths
+                            if (/^[^\/]+\.[a-zA-Z]+$/.test(url)) {
+                              // This matches patterns like "url_foto.jpg", "image.png", etc.
+                              return false;
+                            }
+
+                            // Handle relative paths starting with "/"
+                            if (url.startsWith("/")) return true;
+
+                            // Handle absolute URLs with protocol
+                            if (
+                              url.startsWith("http://") ||
+                              url.startsWith("https://")
+                            ) {
+                              new URL(url);
+                              return true;
+                            }
+
+                            // Handle data URLs
+                            if (url.startsWith("data:image/")) return true;
+
+                            // Anything else is considered invalid
+                            return false;
+                          } catch (e) {
+                            console.log("URL validation error:", e.message);
+                            return false;
+                          }
+                        };
+
+                        const hasValidPhoto =
+                          project.photo && isValidUrl(project.photo);
+
+                        if (hasValidPhoto) {
+                          return (
+                            <Image
+                              src={project.photo}
+                              alt={project.name}
+                              fill
+                              className="object-cover"
+                              onError={(e) => {
+                                console.log(
+                                  "Image load error, showing 'No Image' message"
+                                );
+                                e.target.parentNode.innerHTML = `
+                                  <div class="flex items-center justify-center h-full w-full bg-muted/20">
+                                    <p class="text-muted-foreground text-center flex flex-col items-center">
+                                      <span class="text-3xl mb-2">📷</span>
+                                      <span>Tidak ada gambar</span>
+                                    </p>
+                                  </div>
+                                `;
+                              }}
+                            />
+                          );
+                        } else {
+                          return (
+                            <div className="flex items-center justify-center h-full w-full bg-muted/20">
+                              <p className="text-muted-foreground text-center flex flex-col items-center">
+                                <span className="text-3xl mb-2">📷</span>
+                                <span>Tidak ada gambar</span>
+                              </p>
+                            </div>
+                          );
+                        }
+                      })()}
+                    </motion.div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="mt-6 space-y-4"
+                  >
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <ImageIcon className="h-5 w-5 text-primary" />
+                      Foto Proyek
+                    </h3>
+
+                    <motion.div
+                      whileHover={{ scale: 1.01 }}
+                      className="relative overflow-hidden rounded-md border bg-muted/10 aspect-video w-full max-w-2xl mx-auto shadow-sm hover:shadow-md transition-all"
+                    >
+                      <div className="flex flex-col items-center justify-center h-full w-full bg-muted/20">
+                        <p className="text-muted-foreground text-center flex flex-col items-center mb-4">
+                          <span className="text-3xl mb-2">📷</span>
+                          <span>Tidak ada gambar</span>
+                          {project.photo && (
+                            <span className="text-xs text-red-400 mt-1">
+                              Format gambar tidak valid: "{project.photo}"
+                            </span>
+                          )}
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => {
+                            toast.info(
+                              "Fitur upload gambar tersedia di halaman Edit Proyek",
+                              {
+                                description:
+                                  "Silakan edit proyek untuk menambahkan foto baru",
+                              }
+                            );
+                          }}
+                        >
+                          <UploadIcon className="mr-2 h-4 w-4" />
+                          Tambahkan Foto
+                        </Button>
+                      </div>
                     </motion.div>
                   </motion.div>
                 )}
@@ -332,12 +445,10 @@ export function ProjectDetail({ project, onEdit, onBack }) {
                     <FileTextIcon className="mr-2 h-4 w-4" />
                     Layanan
                   </TabsTrigger>
-                  {project.photo && (
-                    <TabsTrigger value="photo" className="flex-1">
-                      <ImageIcon className="mr-2 h-4 w-4" />
-                      Foto
-                    </TabsTrigger>
-                  )}
+                  <TabsTrigger value="photo" className="flex-1">
+                    <ImageIcon className="mr-2 h-4 w-4" />
+                    Foto
+                  </TabsTrigger>
                 </TabsList>
 
                 {/* Tab content must be inside the Tabs component */}
@@ -436,26 +547,85 @@ export function ProjectDetail({ project, onEdit, onBack }) {
                   </motion.div>
                 </TabsContent>
 
-                {project.photo && (
-                  <TabsContent value="photo" className="mt-0 p-4">
-                    <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
-                      <ImageIcon className="h-5 w-5 text-primary" />
-                      Foto Proyek
-                    </h3>
+                <TabsContent value="photo" className="mt-0 p-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
+                    <ImageIcon className="h-5 w-5 text-primary" />
+                    Foto Proyek
+                  </h3>
 
-                    <div className="relative overflow-hidden rounded-md border bg-muted/10 aspect-video w-full mx-auto">
-                      <Image
-                        src={project.photo}
-                        alt={project.name}
-                        fill
-                        className="object-cover"
-                        onError={(e) => {
-                          e.target.src = "/placeholder-image.jpg"; // Provide a fallback image
-                        }}
-                      />
-                    </div>
-                  </TabsContent>
-                )}
+                  <div className="relative overflow-hidden rounded-md border bg-muted/10 aspect-video w-full mx-auto">
+                    {(() => {
+                      const isValidUrl = (url) => {
+                        try {
+                          if (!url) return false;
+
+                          // Reject common filenames without paths
+                          if (/^[^\/]+\.[a-zA-Z]+$/.test(url)) {
+                            // This matches patterns like "url_foto.jpg", "image.png", etc.
+                            return false;
+                          }
+
+                          // Handle relative paths starting with "/"
+                          if (url.startsWith("/")) return true;
+
+                          // Handle absolute URLs with protocol
+                          if (
+                            url.startsWith("http://") ||
+                            url.startsWith("https://")
+                          ) {
+                            new URL(url);
+                            return true;
+                          }
+
+                          // Handle data URLs
+                          if (url.startsWith("data:image/")) return true;
+
+                          // Anything else is considered invalid
+                          return false;
+                        } catch (e) {
+                          console.log("URL validation error:", e.message);
+                          return false;
+                        }
+                      };
+
+                      const hasValidPhoto =
+                        project.photo && isValidUrl(project.photo);
+
+                      if (hasValidPhoto) {
+                        return (
+                          <Image
+                            src={project.photo}
+                            alt={project.name}
+                            fill
+                            className="object-cover"
+                            onError={(e) => {
+                              console.log(
+                                "Image load error, showing 'No Image' message"
+                              );
+                              e.target.parentNode.innerHTML = `
+                                <div class="flex items-center justify-center h-full w-full bg-muted/20">
+                                  <p class="text-muted-foreground text-center flex flex-col items-center">
+                                    <span class="text-3xl mb-2">📷</span>
+                                    <span>Tidak ada gambar</span>
+                                  </p>
+                                </div>
+                              `;
+                            }}
+                          />
+                        );
+                      } else {
+                        return (
+                          <div className="flex items-center justify-center h-full w-full bg-muted/20">
+                            <p className="text-muted-foreground text-center flex flex-col items-center">
+                              <span className="text-3xl mb-2">📷</span>
+                              <span>Tidak ada gambar</span>
+                            </p>
+                          </div>
+                        );
+                      }
+                    })()}
+                  </div>
+                </TabsContent>
               </Tabs>
             </div>
           </Card>

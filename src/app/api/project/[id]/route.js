@@ -7,7 +7,7 @@ initializeAssociations();
 
 export async function GET(request, { params }) {
   try {
-    const id = params.id;
+    const id = await params?.id;
 
     if (!id) {
       return NextResponse.json(
@@ -54,6 +54,54 @@ export async function GET(request, { params }) {
       {
         success: false,
         message: "Gagal mengambil data proyek",
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    const id = await params?.id;
+
+    if (!id) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ID proyek harus disertakan",
+        },
+        { status: 400 }
+      );
+    }
+
+    const project = await Project.findByPk(id);
+
+    if (!project) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Proyek tidak ditemukan",
+        },
+        { status: 404 }
+      );
+    }
+
+    await project.destroy();
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Proyek berhasil dihapus",
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Gagal menghapus proyek:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Gagal menghapus proyek",
         error: error.message,
       },
       { status: 500 }
