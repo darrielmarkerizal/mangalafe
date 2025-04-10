@@ -16,7 +16,7 @@ export default function Header() {
 
   const NavLink = ({ href, children, type }) => {
     const isActive = pathname === href;
-    const isConsultation = href === "/konsultasi";
+    const isConsultation = href === "/hubungi-kami";
 
     return (
       <Link

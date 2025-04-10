@@ -255,6 +255,7 @@ export async function POST(request) {
         initiator: body.initiator,
         period: body.period,
         photo: body.photo || null,
+        description: body.description || null,
       },
       { transaction: t }
     );
@@ -422,6 +423,10 @@ export async function PUT(request) {
       initiator: body.initiator || existingProject.initiator,
       period: body.period || existingProject.period,
       photo: body.photo !== undefined ? body.photo : existingProject.photo,
+      description:
+        body.description !== undefined
+          ? body.description
+          : existingProject.description,
     };
 
     await existingProject.update(updateData, { transaction: t });

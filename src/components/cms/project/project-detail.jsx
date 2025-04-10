@@ -41,6 +41,7 @@ import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 
 export function ProjectDetail({ project, onEdit, onBack }) {
   const router = useRouter();
@@ -219,6 +220,26 @@ export function ProjectDetail({ project, onEdit, onBack }) {
                           <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                           <p className="font-medium">{project.period}</p>
                         </div>
+                      </motion.div>
+
+                      <motion.div
+                        whileHover={{ scale: 1.01 }}
+                        className="p-3 bg-muted/20 rounded-md border border-transparent hover:border-primary/10 transition-all"
+                      >
+                        <p className="text-sm text-muted-foreground">
+                          Deskripsi
+                        </p>
+                        {project.description ? (
+                          <div className="prose prose-sm max-w-none mt-1">
+                            <p className="whitespace-pre-wrap">
+                              {project.description}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground italic mt-1">
+                            Tidak ada deskripsi proyek
+                          </p>
+                        )}
                       </motion.div>
                     </div>
                   </motion.div>
@@ -486,6 +507,24 @@ export function ProjectDetail({ project, onEdit, onBack }) {
                         <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                         <p className="font-medium">{project.period}</p>
                       </div>
+                    </motion.div>
+
+                    <motion.div
+                      whileTap={{ scale: 0.98 }}
+                      className="p-3 bg-muted/20 rounded-md"
+                    >
+                      <p className="text-sm text-muted-foreground">Deskripsi</p>
+                      {project.description ? (
+                        <div className="prose prose-sm max-w-none mt-1">
+                          <p className="whitespace-pre-wrap">
+                            {project.description}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground italic mt-1">
+                          Tidak ada deskripsi proyek
+                        </p>
+                      )}
                     </motion.div>
                   </div>
 

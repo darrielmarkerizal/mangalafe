@@ -66,6 +66,7 @@ import {
   AlertDialogFooter,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 const projectSchema = z.object({
   name: z.string().min(3, { message: "Nama proyek minimal 3 karakter" }),
@@ -85,6 +86,7 @@ const projectSchema = z.object({
     .url({ message: "URL foto tidak valid" })
     .optional()
     .or(z.literal("")),
+  description: z.string().optional(),
 });
 
 export default function ProjectForm({ project = null, onSuccess }) {
@@ -112,6 +114,7 @@ export default function ProjectForm({ project = null, onSuccess }) {
       period: project?.period || new Date().getFullYear(),
       services: project?.Services?.map((s) => s.id.toString()) || [],
       photo: project?.photo || "",
+      description: project?.description || "",
     },
   });
 
@@ -699,6 +702,29 @@ export default function ProjectForm({ project = null, onSuccess }) {
                     )}
                   />
                 </motion.div>
+
+                {/* Description Section */}
+                <div className="grid grid-cols-1">
+                  <h3 className="text-[14px] mb-1 font-plus-jakarta-sans">
+                    Deskripsi Proyek
+                  </h3>
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Masukkan deskripsi proyek..."
+                            className="min-h-[150px] bg-white font-plus-jakarta-sans resize-y"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 {/* Photo Upload Section */}
                 <motion.div
