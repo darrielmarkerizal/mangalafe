@@ -33,10 +33,6 @@ const Footer = () => {
                 </span>
               </div>
               <div>
-                <h3 className=" font-semibold">Nomor Telepon</h3>
-                <span>+62 8520 0545 411 (Gita)</span>
-              </div>
-              <div>
                 <h3 className="font-semibold">Email:</h3>
                 <span>mangaladipalokatara@gmail.com</span>
               </div>
