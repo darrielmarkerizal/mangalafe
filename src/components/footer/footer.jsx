@@ -5,8 +5,8 @@ import React from "react";
 const Footer = () => {
   const navigationLinks = [
     { href: "/", label: "Beranda" },
-    { href: "/about", label: "Portofolio" },
-    { href: "/services", label: "Hubungi Kami" },
+    { href: "/portofolio", label: "Portofolio" },
+    { href: "/hubungi-kami", label: "Hubungi Kami" },
   ];
 
   return (
