@@ -11,7 +11,7 @@ export default function Header() {
   const navigationLinks = [
     { href: "/", label: "Beranda" },
     { href: "/portofolio", label: "Portofolio" },
-    { href: "/konsultasi", label: "Mulai Konsultasi" },
+    { href: "/hubungi-kami", label: "Mulai Konsultasi" },
   ];
 
   const NavLink = ({ href, children, type }) => {
