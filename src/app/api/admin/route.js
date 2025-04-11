@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import User from "../../../../models/user.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { Op } from "sequelize";
 
 export async function GET(request) {
