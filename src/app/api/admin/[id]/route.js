@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import User from "../../../../../models/user.js";
-import bcrypt from "bcryptjs";
+
+import { encryptData } from "@/lib/utils.js";
 
 export async function GET(request, { params }) {
   try {
@@ -104,8 +105,7 @@ export async function PUT(request, { params }) {
     }
 
     if (body.password) {
-      const saltRounds = 10;
-      updateData.password = await bcrypt.hash(body.password, saltRounds);
+      updateData.password = encryptData(body.password);
     }
 
     await user.update(updateData);
