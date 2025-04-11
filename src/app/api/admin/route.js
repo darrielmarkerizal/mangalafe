@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import User from "../../../../models/user.js";
-import bcrypt from "bcryptjs";
 import { Op } from "sequelize";
+import { encryptData } from "@/lib/utils.js";
 
 export async function GET(request) {
   try {
@@ -175,13 +175,12 @@ export async function POST(request) {
       );
     }
 
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(body.password, saltRounds);
+    const encryptedPassword = encryptData(body.password);
 
     const newUser = await User.create({
       full_name: body.full_name,
       email: body.email,
-      password: hashedPassword,
+      password: encryptedPassword,
     });
 
     const response = { ...newUser.get() };
@@ -255,8 +254,7 @@ export async function PUT(request) {
     }
 
     if (body.password) {
-      const saltRounds = 10;
-      updateData.password = await bcrypt.hash(body.password, saltRounds);
+      updateData.password = encryptData(body.password);
     }
 
     await user.update(updateData);

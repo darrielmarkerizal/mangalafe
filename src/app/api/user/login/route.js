@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+
 import jwt from "jsonwebtoken";
 import User from "../../../../../models/user.js";
 import { testConnection } from "../../../../../config/database.js";
+import { decryptData } from "@/lib/utils.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "mangaladipa_jwt_secret_key";
 
@@ -42,8 +43,8 @@ export async function POST(request) {
       );
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    const decryptedPassword = decryptData(user.password);
+    if (decryptedPassword !== password) {
       return NextResponse.json(
         {
           success: false,
