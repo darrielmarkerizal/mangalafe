@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useRef } from "react";
 import CardPortfolio from "../ui/card-portofolio";
 import axios from "axios";
 import { toast } from "sonner";
@@ -39,31 +40,58 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
+import { motion, AnimatePresence, useInView } from "framer-motion"; // Impor Framer Motion
 
 const SORT_OPTIONS = {
-  "createdAt-DESC": {
-    label: "Terbaru",
-    icon: "↓",
+  "createdAt-DESC": { label: "Terbaru", icon: "↓" },
+  "createdAt-ASC": { label: "Terlama", icon: "↑" },
+  "name-ASC": { label: "Nama (A-Z)", icon: "↓" },
+  "name-DESC": { label: "Nama (Z-A)", icon: "↑" },
+  "period-DESC": { label: "Periode Terbaru", icon: "↓" },
+  "period-ASC": { label: "Periode Terlama", icon: "↑" },
+};
+
+// Variants untuk animasi
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
   },
-  "createdAt-ASC": {
-    label: "Terlama",
-    icon: "↑",
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
+
+const filterVariants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: "easeOut" } },
+};
+
+const badgeVariants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.3, ease: "easeOut" },
   },
-  "name-ASC": {
-    label: "Nama (A-Z)",
-    icon: "↓",
-  },
-  "name-DESC": {
-    label: "Nama (Z-A)",
-    icon: "↑",
-  },
-  "period-DESC": {
-    label: "Periode Terbaru",
-    icon: "↓",
-  },
-  "period-ASC": {
-    label: "Periode Terlama",
-    icon: "↑",
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
+const loaderVariants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.4, ease: "easeOut" },
   },
 };
 
@@ -81,6 +109,9 @@ const PortfolioHero = () => {
   const [perPage] = useState(6);
   const [itemsPerPage, setItemsPerPage] = useState("6");
   const [sortOption, setSortOption] = useState("createdAt-DESC");
+
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "0px" });
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -316,21 +347,40 @@ const PortfolioHero = () => {
   };
 
   return (
-    <section className="mt-[72px]">
+    <section className="mt-[72px]" ref={ref}>
       <div className="container px-4 mx-auto py-16">
-        <div className="flex flex-col text-center">
-          <h1 className="text-primary text-[36px] md:text-[48px] mb-5 font-bold font-montserrat leading-[120%]">
+        <motion.div
+          className="flex flex-col text-center"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+        >
+          <motion.h1
+            className="text-primary text-[36px] md:text-[48px] mb-5 font-bold font-montserrat leading-[120%]"
+            variants={itemVariants}
+          >
             Portofolio Proyek Kami
-          </h1>
-          <p className="font-plus-jakarta-sans text-primary text-[16px] mb-12 max-w-2xl mx-auto">
+          </motion.h1>
+          <motion.p
+            className="font-plus-jakarta-sans text-primary text-[16px] mb-12 max-w-2xl mx-auto"
+            variants={itemVariants}
+          >
             Temukan pengalaman kami dalam mendukung pembangunan berkelanjutan
             melalui proyek-proyek lingkungan di berbagai wilayah Indonesia.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
-        <div className="mb-8 space-y-4 bg-background rounded-lg p-4 shadow-sm border">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 flex gap-2">
+        <motion.div
+          className="mb-8 space-y-4 bg-background rounded-lg p-4 shadow-sm border"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+        >
+          <motion.div
+            className="flex flex-col sm:flex-row gap-4"
+            variants={containerVariants}
+          >
+            <motion.div className="flex-1 flex gap-2" variants={filterVariants}>
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
@@ -347,13 +397,15 @@ const PortfolioHero = () => {
               </div>
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="gap-2 whitespace-nowrap hover:bg-primary hover:text-white transition-colors duration-200"
-                  >
-                    <SlidersHorizontal className="h-4 w-4" />
-                    Filter
-                  </Button>
+                  <motion.div variants={filterVariants}>
+                    <Button
+                      variant="outline"
+                      className="gap-2 whitespace-nowrap hover:bg-primary hover:text-white transition-colors duration-200"
+                    >
+                      <SlidersHorizontal className="h-4 w-4" />
+                      Filter
+                    </Button>
+                  </motion.div>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-full sm:w-[400px] p-6">
                   <SheetHeader className="space-y-4 mb-8">
@@ -471,91 +523,128 @@ const PortfolioHero = () => {
                   </div>
                 </SheetContent>
               </Sheet>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {(search ||
             selectedPeriod !== "all" ||
             selectedService !== "all" ||
             sortOption !== "createdAt-DESC") && (
-            <div className="flex flex-wrap gap-2 animate-in fade-in-0 duration-500">
+            <motion.div
+              className="flex flex-wrap gap-2"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
               {search && (
-                <Badge
-                  variant="secondary"
-                  className="gap-2 px-3 py-1.5 hover:bg-destructive/20 transition-colors cursor-pointer group"
-                  onClick={() => handleRemoveFilter("search")}
-                >
-                  <Search className="h-3 w-3" />
-                  <span className="group-hover:line-through">{search}</span>
-                  <span className="ml-1 text-muted-foreground group-hover:text-destructive">
-                    ×
-                  </span>
-                </Badge>
+                <motion.div variants={badgeVariants}>
+                  <Badge
+                    variant="secondary"
+                    className="gap-2 px-3 py-1.5 hover:bg-destructive/20 transition-colors cursor-pointer group"
+                    onClick={() => handleRemoveFilter("search")}
+                  >
+                    <Search className="h-3 w-3" />
+                    <span className="group-hover:line-through">{search}</span>
+                    <span className="ml-1 text-muted-foreground group-hover:text-destructive">
+                      ×
+                    </span>
+                  </Badge>
+                </motion.div>
               )}
               {selectedPeriod !== "all" && (
-                <Badge
-                  variant="secondary"
-                  className="gap-2 px-3 py-1.5 hover:bg-destructive/20 transition-colors cursor-pointer group"
-                  onClick={() => handleRemoveFilter("period")}
-                >
-                  <span className="text-primary">●</span>
-                  <span className="group-hover:line-through">
-                    Tahun: {selectedPeriod}
-                  </span>
-                  <span className="ml-1 text-muted-foreground group-hover:text-destructive">
-                    ×
-                  </span>
-                </Badge>
+                <motion.div variants={badgeVariants}>
+                  <Badge
+                    variant="secondary"
+                    className="gap-2 px-3 py-1.5 hover:bg-destructive/20 transition-colors cursor-pointer group"
+                    onClick={() => handleRemoveFilter("period")}
+                  >
+                    <span className="text-primary">●</span>
+                    <span className="group-hover:line-through">
+                      Tahun: {selectedPeriod}
+                    </span>
+                    <span className="ml-1 text-muted-foreground group-hover:text-destructive">
+                      ×
+                    </span>
+                  </Badge>
+                </motion.div>
               )}
               {selectedService !== "all" && (
-                <Badge
-                  variant="secondary"
-                  className="gap-2 px-3 py-1.5 hover:bg-destructive/20 transition-colors cursor-pointer group"
-                  onClick={() => handleRemoveFilter("service")}
-                >
-                  <span className="text-primary">●</span>
-                  <span className="group-hover:line-through">
-                    Layanan:{" "}
-                    {
-                      services.find((s) => s.id.toString() === selectedService)
-                        ?.name
-                    }
-                  </span>
-                  <span className="ml-1 text-muted-foreground group-hover:text-destructive">
-                    ×
-                  </span>
-                </Badge>
+                <motion.div variants={badgeVariants}>
+                  <Badge
+                    variant="secondary"
+                    className="gap-2 px-3 py-1.5 hover:bg-destructive/20 transition-colors cursor-pointer group"
+                    onClick={() => handleRemoveFilter("service")}
+                  >
+                    <span className="text-primary">●</span>
+                    <span className="group-hover:line-through">
+                      Layanan:{" "}
+                      {
+                        services.find(
+                          (s) => s.id.toString() === selectedService
+                        )?.name
+                      }
+                    </span>
+                    <span className="ml-1 text-muted-foreground group-hover:text-destructive">
+                      ×
+                    </span>
+                  </Badge>
+                </motion.div>
               )}
               {sortOption !== "createdAt-DESC" && (
-                <Badge
-                  variant="secondary"
-                  className="gap-2 px-3 py-1.5 hover:bg-destructive/20 transition-colors cursor-pointer group"
-                  onClick={() => handleRemoveFilter("sort")}
-                >
-                  <ArrowUpDown className="h-3 w-3" />
-                  <span className="group-hover:line-through">
-                    {SORT_OPTIONS[sortOption].label}
-                  </span>
-                  <span className="ml-1 text-muted-foreground group-hover:text-destructive">
-                    ×
-                  </span>
-                </Badge>
+                <motion.div variants={badgeVariants}>
+                  <Badge
+                    variant="secondary"
+                    className="gap-2 px-3 py-1.5 hover:bg-destructive/20 transition-colors cursor-pointer group"
+                    onClick={() => handleRemoveFilter("sort")}
+                  >
+                    <ArrowUpDown className="h-3 w-3" />
+                    <span className="group-hover:line-through">
+                      {SORT_OPTIONS[sortOption].label}
+                    </span>
+                    <span className="ml-1 text-muted-foreground group-hover:text-destructive">
+                      ×
+                    </span>
+                  </Badge>
+                </motion.div>
               )}
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
 
         {isLoading ? (
-          <div className="flex justify-center items-center min-h-[400px] bg-background/50 rounded-lg border border-dashed">
+          <motion.div
+            className="flex justify-center items-center min-h-[400px] bg-background/50 rounded-lg border border-dashed"
+            variants={loaderVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <div className="flex flex-col items-center gap-2">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">Memuat proyek...</p>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              >
+                <Loader2 className="h-8 w-8 text-primary" />
+              </motion.div>
+              <motion.p
+                className="text-sm text-muted-foreground"
+                variants={itemVariants}
+              >
+                Memuat proyek...
+              </motion.p>
             </div>
-          </div>
+          </motion.div>
         ) : projects.length === 0 ? (
-          <div className="flex justify-center items-center min-h-[400px] bg-background/50 rounded-lg border border-dashed">
-            <div className="text-center space-y-4 max-w-md mx-auto px-4">
-              <div className="space-y-2">
+          <motion.div
+            className="flex justify-center items-center min-h-[400px] bg-background/50 rounded-lg border border-dashed"
+            variants={loaderVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div
+              className="text-center space-y-4 max-w-md mx-auto px-4"
+              variants={containerVariants}
+            >
+              <motion.div className="space-y-2" variants={itemVariants}>
                 <p className="text-lg font-medium text-primary">
                   Tidak Ada Proyek
                 </p>
@@ -563,43 +652,79 @@ const PortfolioHero = () => {
                   Tidak ada proyek yang sesuai dengan kriteria pencarian Anda.
                   Silakan coba:
                 </p>
-              </div>
-              <ul className="text-sm text-muted-foreground space-y-2 text-left list-disc list-inside">
-                <li>Mengubah kata kunci pencarian</li>
-                <li>Memilih periode tahun yang berbeda</li>
-                <li>Memilih kategori layanan lainnya</li>
-                <li>Menghapus beberapa filter yang aktif</li>
-              </ul>
-              <Button
-                variant="outline"
-                onClick={handleResetFilter}
-                className="mt-4 hover:bg-primary hover:text-white transition-colors"
+              </motion.div>
+              <motion.ul
+                className="text-sm text-muted-foreground space-y-2 text-left list-disc list-inside"
+                variants={containerVariants}
               >
-                Reset Semua Filter
-              </Button>
-            </div>
-          </div>
+                {[
+                  "Mengubah kata kunci pencarian",
+                  "Memilih periode tahun yang berbeda",
+                  "Memilih kategori layanan lainnya",
+                  "Menghapus beberapa filter yang aktif",
+                ].map((text, index) => (
+                  <motion.li key={index} variants={itemVariants}>
+                    {text}
+                  </motion.li>
+                ))}
+              </motion.ul>
+              <motion.div variants={itemVariants}>
+                <Button
+                  variant="outline"
+                  onClick={handleResetFilter}
+                  className="mt-4 hover:bg-primary hover:text-white transition-colors"
+                >
+                  Reset Semua Filter
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
-                <CardPortfolio
-                  key={project.id}
-                  title={project.name}
-                  description={getProjectDescription(project)}
-                  imageUrl={
-                    isValidImageUrl(project.photo) ? project.photo : "/logo.svg"
-                  }
-                  service={project.Services.map((service) => service.name)}
-                  client={project.initiator}
-                  period={project.period}
-                  link={`/portfolio/${project.id}`}
-                />
-              ))}
-            </div>
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <AnimatePresence>
+                {projects.map((project) => (
+                  <motion.div
+                    key={project.id}
+                    variants={cardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
+                    layout
+                  >
+                    <CardPortfolio
+                      title={project.name}
+                      description={getProjectDescription(project)}
+                      imageUrl={
+                        isValidImageUrl(project.photo)
+                          ? project.photo
+                          : "/logo.svg"
+                      }
+                      service={project.Services.map((service) => service.name)}
+                      client={project.initiator}
+                      period={project.period}
+                      link={`/portfolio/${project.id}`}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
 
-            <div className="mt-8 flex flex-col sm:flex-row items-center gap-6 bg-background rounded-lg p-6 shadow-sm border">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground w-full sm:w-auto">
+            <motion.div
+              className="mt-8 flex flex-col sm:flex-row items-center gap-6 bg-background rounded-lg p-6 shadow-sm border"
+              variants={containerVariants}
+              initial="hidden"
+              animate={isInView ? "visible" : "hidden"}
+            >
+              <motion.div
+                className="flex items-center gap-2 text-sm text-muted-foreground w-full sm:w-auto"
+                variants={itemVariants}
+              >
                 <span>Menampilkan</span>
                 <Select
                   value={itemsPerPage}
@@ -619,53 +744,71 @@ const PortfolioHero = () => {
                   </SelectContent>
                 </Select>
                 <span>item per halaman</span>
-              </div>
+              </motion.div>
 
-              <div className="w-full sm:w-auto flex justify-center sm:ml-auto">
+              <motion.div
+                className="w-full sm:w-auto flex justify-center sm:ml-auto"
+                variants={itemVariants}
+              >
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      <PaginationPrevious
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.max(prev - 1, 1))
-                        }
-                        disabled={currentPage === 1}
-                        className="hover:bg-primary hover:text-white transition-colors"
-                      />
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <PaginationPrevious
+                          onClick={() =>
+                            setCurrentPage((prev) => Math.max(prev - 1, 1))
+                          }
+                          disabled={currentPage === 1}
+                          className="hover:bg-primary hover:text-white transition-colors"
+                        />
+                      </motion.div>
                     </PaginationItem>
                     {Array.from(
                       { length: Math.max(totalPages, 1) },
                       (_, i) => i + 1
                     ).map((page) => (
                       <PaginationItem key={page}>
-                        <PaginationLink
-                          onClick={() => setCurrentPage(page)}
-                          isActive={currentPage === page}
-                          className={`hover:bg-primary/10 transition-colors ${
-                            currentPage === page
-                              ? "bg-primary text-white hover:bg-primary/90"
-                              : ""
-                          }`}
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
                         >
-                          {page}
-                        </PaginationLink>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                            className={`hover:bg-primary/10 transition-colors ${
+                              currentPage === page
+                                ? "bg-primary text-white hover:bg-primary/90"
+                                : ""
+                            }`}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </motion.div>
                       </PaginationItem>
                     ))}
                     <PaginationItem>
-                      <PaginationNext
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.min(prev + 1, Math.max(totalPages, 1))
-                          )
-                        }
-                        disabled={currentPage === Math.max(totalPages, 1)}
-                        className="hover:bg-primary hover:text-white transition-colors"
-                      />
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <PaginationNext
+                          onClick={() =>
+                            setCurrentPage((prev) =>
+                              Math.min(prev + 1, Math.max(totalPages, 1))
+                            )
+                          }
+                          disabled={currentPage === Math.max(totalPages, 1)}
+                          className="hover:bg-primary hover:text-white transition-colors"
+                        />
+                      </motion.div>
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </>
         )}
       </div>
