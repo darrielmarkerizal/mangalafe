@@ -1,15 +1,25 @@
 import React from "react";
 import Image from "next/image";
+import { NumberTicker } from "../magicui/number-ticker";
 
-const CardKeahlian = ({ title, subtitle, content, type, className = "" }) => {
+const CardKeahlian = ({
+  value,
+  unit,
+  subtitle,
+  content,
+  type,
+  className = "",
+}) => {
   if (type === "stats") {
     return (
       <div
         className={`bg-white p-8 min-h-[245px] flex flex-col justify-between ${className}`}
       >
         <h2 className="text-[52px] font-bold text-primary leading-[120%] font-montserrat">
-          {title}
+          <NumberTicker value={value} className="text-primary" />
+          {unit && <span className="ml-2">{unit}</span>}
         </h2>
+
         <div>
           <h3 className="text-primary text-[18px] font-semibold font-plus-jakarta-sans">
             {subtitle}
