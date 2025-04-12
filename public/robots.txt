@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Allow: /hubungi-kami
+Allow: /portofolio
+
+Sitemap: https://mangalafe.vercel.app/sitemap.xml
