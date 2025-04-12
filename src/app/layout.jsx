@@ -16,14 +16,34 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata = {
-  title: "PT Mangala Dipa Lokatara | Konsultan Lingkungan di Indonesia",
+  title: "PT Mangala Dipa Lokatara | Konsultan Lingkungan Indonesia",
   description:
-    "Menyediakan layanan profesional untuk pembangunan berkelanjutan dan pelestarian lingkungan.",
+    "PT Mangala Dipa Lokatara adalah konsultan lingkungan profesional yang menyediakan layanan AMDAL, UKL-UPL, perizinan lingkungan, dan solusi berkelanjutan di seluruh Indonesia.",
+  keywords:
+    "konsultan lingkungan, amdal, ukl upl, jasa lingkungan, mangala dipa lokatara, sustainability indonesia, izin lingkungan, analisis dampak lingkungan, jasa konsultasi lingkungan indonesia",
+  authors: [
+    { name: "PT Mangala Dipa Lokatara", url: process.env.NEXT_PUBLIC_SITE_URL },
+  ],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL),
+  openGraph: {
+    title: "PT Mangala Dipa Lokatara",
+    description:
+      "Konsultan Lingkungan terpercaya di Indonesia untuk solusi pembangunan berkelanjutan.",
+    url: process.env.NEXT_PUBLIC_SITE_URL,
+    siteName: "Mangala Dipa Lokatara",
+    locale: "id_ID",
+    type: "website",
+  },
+  robots: "index, follow",
+  themeColor: "#0F172A",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="id">
       <body
         className={`${montserrat.variable} ${plusJakartaSans.variable} font-sans antialiased`}
         suppressHydrationWarning
