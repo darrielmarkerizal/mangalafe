@@ -1,6 +1,46 @@
-import { Section } from "lucide-react";
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 import CardLayanan from "../ui/card-layanan";
+
+// animasi per-card
+const AnimatedCard = ({ children }) => {
+  const controls = useAnimation();
+  const [ref, inView] = useInView({ threshold: 0.2 });
+
+  useEffect(() => {
+    if (inView) {
+      controls.start("visible");
+    } else {
+      controls.start("hidden");
+    }
+  }, [controls, inView]);
+
+  const variants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={controls}
+      variants={variants}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 const Layanan = () => {
   const layananData = [
@@ -67,43 +107,50 @@ const Layanan = () => {
           </p>
         </div>
 
-        {/* Mobile Layout (1 column, 8 rows) */}
+        {/* Mobile Layout */}
         <div className="grid md:hidden gap-6">
           {layananData.map((data, index) => (
-            <CardLayanan key={index} {...data} index={index} />
+            <AnimatedCard key={index}>
+              <CardLayanan {...data} index={index} />
+            </AnimatedCard>
           ))}
         </div>
 
-        {/* Desktop Layout (50-50 split) */}
+        {/* Desktop Layout */}
         <div className="hidden md:flex gap-6">
-          {/* Left Side */}
-          <div className="w-1/2">
-            <div className="grid gap-6">
-              {/* First row - 2 cards */}
-              <div className="grid grid-cols-2 gap-6">
+          <div className="w-1/2 grid gap-6">
+            <div className="grid grid-cols-2 gap-6">
+              <AnimatedCard>
                 <CardLayanan {...layananData[0]} />
+              </AnimatedCard>
+              <AnimatedCard>
                 <CardLayanan {...layananData[1]} />
-              </div>
-              {/* Second row - 2 cards */}
-              <div className="grid grid-cols-2 gap-6">
+              </AnimatedCard>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <AnimatedCard>
                 <CardLayanan {...layananData[2]} />
+              </AnimatedCard>
+              <AnimatedCard>
                 <CardLayanan {...layananData[3]} />
-              </div>
-              {/* Third row - 1 card */}
-              <div className="grid grid-cols-1">
-                <CardLayanan {...layananData[4]} index={4} />
-              </div>
+              </AnimatedCard>
+            </div>
+            <div className="grid grid-cols-1">
+              <AnimatedCard>
+                <CardLayanan {...layananData[4]} />
+              </AnimatedCard>
             </div>
           </div>
-
-          {/* Right Side */}
-          <div className="w-1/2">
-            <div className="grid gap-6">
-              {/* Three full-width cards */}
-              <CardLayanan {...layananData[5]} index={5} />
-              <CardLayanan {...layananData[6]} index={6} />
-              <CardLayanan {...layananData[7]} index={7} />
-            </div>
+          <div className="w-1/2 grid gap-6">
+            <AnimatedCard>
+              <CardLayanan {...layananData[5]} />
+            </AnimatedCard>
+            <AnimatedCard>
+              <CardLayanan {...layananData[6]} />
+            </AnimatedCard>
+            <AnimatedCard>
+              <CardLayanan {...layananData[7]} />
+            </AnimatedCard>
           </div>
         </div>
       </div>

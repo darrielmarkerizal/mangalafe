@@ -1,5 +1,6 @@
 import React from "react";
 import CardTim from "../ui/card-tim";
+import AnimatedCardWrapper from "@/lib/AnimatedCardWrapper";
 
 const teamData = [
   {
@@ -49,12 +50,13 @@ const Tim = () => {
         </div>
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           {teamData.map((member, index) => (
-            <CardTim
-              key={index}
-              name={member.name}
-              position={member.position}
-              image={member.image}
-            />
+            <AnimatedCardWrapper key={index}>
+              <CardTim
+                name={member.name}
+                position={member.position}
+                image={member.image}
+              />
+            </AnimatedCardWrapper>
           ))}
         </div>
       </div>
