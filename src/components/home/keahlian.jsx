@@ -6,7 +6,8 @@ import CardKeahlian from "../ui/card-keahlian";
 const Keahlian = () => {
   const keahlianList = [
     {
-      title: "12 Projects",
+      value: 12,
+      unit: "Projects",
       subtitle: "Proyek Terverifikasi",
       type: "stats",
       content:
@@ -17,14 +18,16 @@ const Keahlian = () => {
       content: "/images/hero-bg.png",
     },
     {
-      title: "5 Wilayah",
+      value: 5,
+      unit: "Wilayah",
       subtitle: "Wilayah Proyek",
       type: "stats",
       content:
         "Meliputi Yogyakarta, Riau, Kalimantan, Sulawesi, Jawa Barat, dan Jawa Timur",
     },
     {
-      title: "31,18 KM",
+      value: 31.18,
+      unit: "KM",
       subtitle: "Pipa Gas",
       type: "stats",
       content:
