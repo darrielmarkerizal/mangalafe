@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Montserrat, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import LayoutWrapper from "@/components/layout/layout-wrapper";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
