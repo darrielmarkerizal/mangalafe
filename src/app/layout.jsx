@@ -31,12 +31,14 @@ export const metadata = {
       "Konsultan Lingkungan terpercaya di Indonesia untuk solusi pembangunan berkelanjutan.",
     url: process.env.NEXT_PUBLIC_SITE_URL,
     siteName: "Mangala Dipa Lokatara",
-
     locale: "id_ID",
     type: "website",
   },
   robots: "index, follow",
   themeColor: "#0F172A",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({ children }) {
