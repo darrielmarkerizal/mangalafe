@@ -4,34 +4,34 @@ import AnimatedCardWrapper from "@/lib/AnimatedCardWrapper";
 
 const teamData = [
   {
-    name: "Dr. Ahmad Rizki",
-    position: "Environmental Director",
-    image: "/images/hero-bg.png",
+    name: "IWAN WILIYANTO, S.T., M.M.",
+    position: "Komisaris",
+    image: "/images/Komisaris.png",
   },
   {
-    name: "Ir. Sarah Putri",
-    position: "Senior Environmental Engineer",
-    image: "/images/hero-bg.png",
+    name: "EMMANUELLE SARASWATI GITA DEWI, S.HUT., MBA",
+    position: "Direktur",
+    image: "/images/Gita.png",
   },
   {
-    name: "Dr. Budi Santoso",
-    position: "Waste Management Specialist",
-    image: "/images/hero-bg.png",
+    name: "FAHMI ANSHARI, S.T.P.",
+    position: "Operasional",
+    image: "/images/Fahmi.png",
   },
   {
-    name: "Ir. Maya Indah",
-    position: "Sustainability Consultant",
-    image: "/images/hero-bg.png",
+    name: "SURYO ARIF SETYAWAN, S.Si.",
+    position: "Biologi",
+    image: "/images/Surya.png",
   },
   {
-    name: "Dr. Rendra Pratama",
-    position: "Environmental Analyst",
-    image: "/images/hero-bg.png",
+    name: "SHERLY DEVIANTY, S.T., M.Sc.",
+    position: "Teknik Sipil dan Transportasi",
+    image: "/images/Sherly.png",
   },
   {
-    name: "Ir. Nina Widya",
-    position: "Environmental Project Manager",
-    image: "/images/hero-bg.png",
+    name: "ADE ULFA NUGROHO, S.Si.",
+    position: "Biologi",
+    image: "/images/Ade.png",
   },
 ];
 
