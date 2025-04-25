@@ -1,10 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import axios from "axios";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 
 const SectionHubungiKami = () => {
   const [services, setServices] = useState([]);
@@ -18,6 +19,45 @@ const SectionHubungiKami = () => {
     message: "",
     agreement: false,
   });
+  
+  const sectionRef = useRef(null);
+  const isInView = useInView(sectionRef, { once: false, threshold: 0.1 });
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const headerVariants = {
+    hidden: { y: -30, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1, 
+      transition: { 
+        duration: 0.6, 
+        ease: "easeOut" 
+      } 
+    }
+  };
 
   // Fetch services on component mount
   useEffect(() => {
@@ -52,6 +92,7 @@ const SectionHubungiKami = () => {
       // Validate form data
       if (!formData.agreement) {
         toast.error("Anda harus menyetujui persyaratan dan ketentuan");
+        setIsLoading(false);
         return;
       }
 
@@ -89,20 +130,37 @@ const SectionHubungiKami = () => {
   };
 
   return (
-    <section className="py-16 mt-[72px]">
+    <section ref={sectionRef} className="py-16 mt-[72px]">
       <div className="container mx-auto px-4">
-        <div className="mb-12 text-center flex flex-col items-center">
-          <h1 className="text-primary font-bold font-montserrat text-[32px] md:text-[48px] leading-[120%] text-center mb-6 md:max-w-[50%]">
+        <motion.div 
+          className="mb-12 text-center flex flex-col items-center"
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          variants={containerVariants}
+        >
+          <motion.h1 
+            className="text-primary font-bold font-montserrat text-[32px] md:text-[48px] leading-[120%] text-center mb-6 md:max-w-[50%]"
+            variants={headerVariants}
+          >
             Hubungi Kami untuk Solusi Lingkungan Anda
-          </h1>
-          <h3 className="text-primary text-[16px] md:text-[18px] font-plus-jakarta-sans leading-[150%] text-center md:max-w-[30%]">
+          </motion.h1>
+          <motion.h3 
+            className="text-primary text-[16px] md:text-[18px] font-plus-jakarta-sans leading-[150%] text-center md:max-w-[30%]"
+            variants={headerVariants}
+          >
             Kami siap mendampingi proyek Anda dengan layanan konsultasi
             lingkungan yang profesional dan terpercaya.
-          </h3>
-        </div>
-        <div className="max-w-3xl mx-auto">
+          </motion.h3>
+        </motion.div>
+
+        <motion.div 
+          className="max-w-3xl mx-auto"
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          variants={containerVariants}
+        >
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h3 className="text-[14px] mb-1 font-plus-jakarta-sans">
                   Nama Depan <span className="text-red-500">*</span>
@@ -131,8 +189,9 @@ const SectionHubungiKami = () => {
                   className="bg-white py-2 font-plus-jakarta-sans"
                 />
               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h3 className="text-[14px] mb-1 font-plus-jakarta-sans">
                   Email <span className="text-red-500">*</span>
@@ -161,8 +220,9 @@ const SectionHubungiKami = () => {
                   className="bg-white py-2 font-plus-jakarta-sans"
                 />
               </div>
-            </div>
-            <div className="grid grid-cols-1">
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="grid grid-cols-1">
               <h3 className="text-[14px] mb-1 font-plus-jakarta-sans">
                 Pilih Layanan <span className="text-red-500">*</span>
               </h3>
@@ -180,8 +240,9 @@ const SectionHubungiKami = () => {
                   </option>
                 ))}
               </select>
-            </div>
-            <div className="grid grid-cols-1">
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="grid grid-cols-1">
               <h3 className="text-[14px] mb-1 font-plus-jakarta-sans">
                 Pesan Anda <span className="text-red-500">*</span>
               </h3>
@@ -193,8 +254,9 @@ const SectionHubungiKami = () => {
                 required
                 className="min-h-[150px] bg-white font-plus-jakarta-sans"
               />
-            </div>
-            <div className="grid grid-cols-1">
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="grid grid-cols-1">
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -212,21 +274,24 @@ const SectionHubungiKami = () => {
                   Saya menyetujui persyaratan dan ketentuan{" "}
                 </label>
               </div>
-            </div>
-            <div className="grid grid-cols-1">
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="grid grid-cols-1">
               <div className="flex justify-center">
-                <button
+                <motion.button
                   type="submit"
                   disabled={isLoading}
                   className="bg-primary text-white py-2 px-6 rounded-md hover:bg-primary/90 transition-colors w-fit flex items-center gap-2 disabled:opacity-70"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                   {isLoading ? "Mengirim..." : "Kirim"}
-                </button>
+                </motion.button>
               </div>
-            </div>
+            </motion.div>
           </form>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
