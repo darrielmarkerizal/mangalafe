@@ -206,7 +206,7 @@ export function ProjectDetail({ project, onEdit, onBack }) {
                         className="p-3 bg-muted/20 rounded-md border border-transparent hover:border-primary/10 transition-all"
                       >
                         <p className="text-sm text-muted-foreground">
-                          Initiator
+                          Pemrakarsa
                         </p>
                         <p className="font-medium">{project.initiator}</p>
                       </motion.div>
@@ -494,7 +494,9 @@ export function ProjectDetail({ project, onEdit, onBack }) {
                       whileTap={{ scale: 0.98 }}
                       className="p-3 bg-muted/20 rounded-md"
                     >
-                      <p className="text-sm text-muted-foreground">Initiator</p>
+                      <p className="text-sm text-muted-foreground">
+                        Pemrakarsa
+                      </p>
                       <p className="font-medium">{project.initiator}</p>
                     </motion.div>
 
