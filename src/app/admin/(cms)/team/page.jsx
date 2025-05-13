@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   DndContext,
   closestCenter,
@@ -21,23 +21,8 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -47,27 +32,36 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Plus,
   Users,
-  Search,
+  Search as SearchIcon,
   SortAsc,
   SortDesc,
-  Filter,
-  X,
-  RefreshCw,
-  ChevronDown,
+  Filter as FilterIcon,
+  X as XIcon,
+  RefreshCw as RefreshCwIcon,
+  ChevronDown as ChevronDownIcon,
+  ChevronUp as ChevronUpIcon,
+  AlertCircle as AlertCircleIcon,
+  Trash as TrashIcon,
 } from "lucide-react";
 
 import TeamMembersList from "@/components/cms/team/team-members-list";
@@ -115,8 +109,6 @@ export default function TeamPage() {
   const [currentSortBy, setCurrentSortBy] = useState(sortBy);
   const [currentSortOrder, setCurrentSortOrder] = useState(sortOrder);
   const [currentLimit, setCurrentLimit] = useState(limit.toString());
-
-  // Add a new state for filter visibility on mobile
   const [showFilters, setShowFilters] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -130,22 +122,26 @@ export default function TeamPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, search, isActiveFilter, sortBy, sortOrder]);
 
-  const fetchTeamMembers = async () => {
+  const fetchTeamMembers = async (params = {}) => {
     try {
       setIsLoading(true);
 
       // Build query string for API request
       const queryParams = new URLSearchParams();
-      queryParams.append("page", page);
-      queryParams.append("limit", limit);
+      queryParams.append("page", params.page || page);
+      queryParams.append("limit", params.limit || limit);
 
-      if (search) queryParams.append("search", search);
-      if (isActiveFilter !== null && isActiveFilter !== undefined) {
-        queryParams.append("isActive", isActiveFilter);
+      if (params.search || search)
+        queryParams.append("search", params.search || search);
+
+      const activeStatus =
+        params.isActive !== undefined ? params.isActive : isActiveFilter;
+      if (activeStatus !== null && activeStatus !== undefined) {
+        queryParams.append("isActive", activeStatus);
       }
 
-      queryParams.append("sortBy", sortBy);
-      queryParams.append("sortOrder", sortOrder);
+      queryParams.append("sortBy", params.sortBy || sortBy);
+      queryParams.append("sortOrder", params.sortOrder || sortOrder);
 
       const response = await axios.get(`/api/team?${queryParams.toString()}`);
 
@@ -158,9 +154,24 @@ export default function TeamPage() {
     } catch (error) {
       console.error("Error fetching team members:", error);
       toast.error("Gagal memuat data tim");
+      setTeamMembers([]);
+      setPagination({
+        page: 1,
+        limit: 10,
+        totalPages: 0,
+        totalItems: 0,
+        hasNextPage: false,
+        hasPrevPage: false,
+      });
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    updateQueryParams({ search: searchTerm, page: 1 });
   };
 
   const handleDragEnd = async (event) => {
@@ -228,7 +239,7 @@ export default function TeamPage() {
       // Update local state
       setTeamMembers(
         teamMembers.map((m) =>
-          m.id === member.id ? { ...m, isActive: !m.isActive } : m
+          m.id === member.id ? { ...m, isActive: !member.isActive } : m
         )
       );
 
@@ -310,9 +321,7 @@ export default function TeamPage() {
         response = await axios.put(
           `/api/team/${currentMember.id}`,
           memberData,
-          {
-            headers,
-          }
+          { headers }
         );
       } else {
         // Create new member
@@ -356,16 +365,34 @@ export default function TeamPage() {
     updateQueryParams({ page: newPage });
   };
 
-  const handleFilterSubmit = (e) => {
-    e.preventDefault();
+  const handleApplyFilters = () => {
     updateQueryParams({
-      search: searchTerm,
       isActive: activeFilter,
       sortBy: currentSortBy,
       sortOrder: currentSortOrder,
-      limit: currentLimit,
-      page: 1, // Reset to first page when filters change
+      limit: parseInt(currentLimit),
+      page: 1,
     });
+    setShowFilters(false);
+  };
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setActiveFilter(null);
+    setCurrentSortBy("displayOrder");
+    setCurrentSortOrder("ASC");
+    setCurrentLimit("10");
+
+    updateQueryParams({
+      search: null,
+      isActive: null,
+      sortBy: "displayOrder",
+      sortOrder: "ASC",
+      limit: 10,
+      page: 1,
+    });
+
+    setShowFilters(false);
   };
 
   const updateQueryParams = (params) => {
@@ -384,21 +411,13 @@ export default function TeamPage() {
     router.push(`/admin/team?${newSearchParams.toString()}`);
   };
 
-  const clearFilters = () => {
-    setSearchTerm("");
-    setActiveFilter(null);
-    setCurrentSortBy("displayOrder");
-    setCurrentSortOrder("ASC");
-    setCurrentLimit("10");
+  const handlePerPageChange = (value) => {
+    setCurrentLimit(value);
+    updateQueryParams({ limit: parseInt(value), page: 1 });
+  };
 
-    updateQueryParams({
-      search: null,
-      isActive: null,
-      sortBy: "displayOrder",
-      sortOrder: "ASC",
-      limit: 10,
-      page: 1,
-    });
+  const handleSortChange = (value) => {
+    setCurrentSortBy(value);
   };
 
   const toggleSortOrder = () => {
@@ -407,148 +426,138 @@ export default function TeamPage() {
     updateQueryParams({ sortOrder: newOrder });
   };
 
-  // Add a refresh function
-  const handleRefresh = async () => {
+  const handleRefresh = () => {
     setIsRefreshing(true);
-    await fetchTeamMembers();
-    setIsRefreshing(false);
+    fetchTeamMembers();
   };
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto py-4 md:py-6 lg:py-10 px-4 sm:px-6 lg:px-8"
+      className="space-y-6"
     >
-      <Card className="shadow-sm border-zinc-200/80 bg-white">
-        <CardHeader className="pb-4 border-b">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1.5">
-              <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
-                <Users className="h-6 w-6 text-primary" />
-                Manajemen Tim
-              </CardTitle>
-              <CardDescription className="text-sm sm:text-base">
-                Kelola anggota tim yang ditampilkan di website
-              </CardDescription>
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm border">
+        {/* Search and Filter Section */}
+        <motion.div
+          initial={{ y: -10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="p-5 border-b"
+        >
+          <form onSubmit={handleSearch} className="flex gap-2 w-full">
+            <div className="relative flex-1">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Cari nama atau jabatan..."
+                className="pl-9 h-10 bg-muted/20"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <div className="flex flex-wrap gap-2">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button type="submit" variant="secondary" className="h-10">
+                Cari
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="h-9"
+                type="button"
+                variant={showFilters ? "default" : "outline"}
+                size="icon"
+                className="h-10 w-10"
+                onClick={() => setShowFilters(!showFilters)}
               >
-                <RefreshCw
-                  className={`h-4 w-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`}
-                />
-                Refresh
+                <FilterIcon className="h-4 w-4" />
               </Button>
-              <Button onClick={handleAddNewMember} size="sm" className="h-9">
-                <Plus className="h-4 w-4 mr-1.5" />
-                Tambah Anggota
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
+            </motion.div>
+          </form>
+        </motion.div>
 
-        {/* Mobile filter toggle */}
-        <div className="px-6 py-3 md:hidden">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-            className="w-full flex justify-between items-center text-muted-foreground"
-          >
-            <span className="flex items-center">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter & Pencarian
-            </span>
-            <ChevronDown
-              className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`}
-            />
-          </Button>
-        </div>
+        {/* Active Filters */}
+        <AnimatePresence>
+          {activeFilter !== null && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="flex items-center gap-2 p-3 bg-muted/10 border-b overflow-hidden"
+            >
+              <span className="text-sm text-muted-foreground">
+                Filter aktif:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {activeFilter !== null && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                  >
+                    <Badge variant="secondary" className="gap-1 px-2 py-1">
+                      Status:{" "}
+                      {activeFilter === "true" ? "Aktif" : "Tidak Aktif"}
+                      <XIcon
+                        className="h-3 w-3 ml-1 cursor-pointer"
+                        onClick={() => {
+                          setActiveFilter(null);
+                          updateQueryParams({ isActive: null });
+                        }}
+                      />
+                    </Badge>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Filter section */}
-        <CardContent className="pt-4 bg-white">
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{
-              height: showFilters || window.innerWidth >= 768 ? "auto" : 0,
-              opacity: showFilters || window.innerWidth >= 768 ? 1 : 0,
-            }}
-            className="overflow-hidden md:overflow-visible"
-          >
-            <form onSubmit={handleFilterSubmit} className="mb-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-4 gap-y-4">
+        {/* Advanced Filter Panel */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="p-5 bg-muted/5 border-b overflow-hidden"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="search" className="text-sm font-medium">
-                    Cari
-                  </Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="search"
-                      placeholder="Cari nama atau jabatan..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-9 h-10"
-                    />
+                  <div className="flex items-center mb-1.5">
+                    <span className="text-sm font-medium">Status Anggota</span>
+                    {activeFilter !== null && (
+                      <Badge
+                        variant="outline"
+                        className="ml-2 text-xs font-normal"
+                      >
+                        {activeFilter === "true" ? "Aktif" : "Tidak Aktif"}
+                      </Badge>
+                    )}
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="status" className="text-sm font-medium">
-                    Status
-                  </Label>
                   <Select
                     value={activeFilter === null ? "all" : activeFilter}
                     onValueChange={(value) =>
                       setActiveFilter(value === "all" ? null : value)
                     }
                   >
-                    <SelectTrigger className="w-full h-10">
-                      <SelectValue placeholder="Semua status" />
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Status anggota" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Semua status</SelectItem>
+                      <SelectItem value="all">Semua Status</SelectItem>
                       <SelectItem value="true">Aktif</SelectItem>
-                      <SelectItem value="false">Tidak aktif</SelectItem>
+                      <SelectItem value="false">Tidak Aktif</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="sortBy" className="text-sm font-medium">
-                    Urutan
-                  </Label>
-                  <Select
-                    value={currentSortBy}
-                    onValueChange={setCurrentSortBy}
-                  >
-                    <SelectTrigger className="w-full h-10">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="displayOrder">
-                        Urutan tampilan
-                      </SelectItem>
-                      <SelectItem value="name">Nama</SelectItem>
-                      <SelectItem value="position">Jabatan</SelectItem>
-                      <SelectItem value="createdAt">Tanggal dibuat</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="limit" className="text-sm font-medium">
-                    Tampilkan
-                  </Label>
+                  <div className="flex items-center mb-1.5">
+                    <span className="text-sm font-medium">Tampilkan</span>
+                  </div>
                   <Select value={currentLimit} onValueChange={setCurrentLimit}>
-                    <SelectTrigger className="w-full h-10">
-                      <SelectValue />
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Item per halaman" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="5">5 per halaman</SelectItem>
@@ -558,121 +567,182 @@ export default function TeamPage() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                <div className="space-y-2 sm:self-end">
-                  <div className="flex items-center gap-2 h-10">
-                    <Button type="submit" className="flex-1 h-10">
-                      <Filter className="h-4 w-4 mr-2" />
-                      Terapkan
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={toggleSortOrder}
-                      className="h-10 w-10 p-0 flex items-center justify-center"
-                      title={
-                        currentSortOrder === "ASC"
-                          ? "Urutkan Menurun"
-                          : "Urutkan Menaik"
-                      }
-                    >
-                      {currentSortOrder === "ASC" ? (
-                        <SortAsc className="h-4 w-4" />
-                      ) : (
-                        <SortDesc className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={clearFilters}
-                      className="h-10 w-10 p-0 flex items-center justify-center"
-                      title="Reset Filter"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
               </div>
-            </form>
-          </motion.div>
 
-          <Separator className="my-4" />
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={handleResetFilters}
+                  size="sm"
+                  className="font-normal"
+                >
+                  Reset Filter
+                </Button>
+                <Button
+                  onClick={handleApplyFilters}
+                  size="sm"
+                  className="font-medium"
+                >
+                  Terapkan Filter
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-          <div className="overflow-hidden rounded-md">
-            {isLoading ? (
-              <TeamMembersLoading />
-            ) : teamMembers.length === 0 ? (
-              <EmptyTeamState onAddMember={handleAddNewMember} />
-            ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-                modifiers={[restrictToVerticalAxis]}
-              >
-                <div className="border rounded-md overflow-x-auto bg-white">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-slate-50 hover:bg-slate-100">
-                        <TableHead className="w-[80px]">Foto</TableHead>
-                        <TableHead>Nama</TableHead>
-                        <TableHead className="hidden sm:table-cell">
-                          Jabatan
-                        </TableHead>
-                        <TableHead className="text-center">Aktif</TableHead>
-                        <TableHead>Aksi</TableHead>
-                        <TableHead className="w-[60px] text-center">
-                          <Badge
-                            variant="outline"
-                            className="whitespace-nowrap"
-                          >
-                            Urutan
-                          </Badge>
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <SortableContext
-                        items={teamMembers.map((member) => member.id)}
-                        strategy={verticalListSortingStrategy}
-                      >
-                        <TeamMembersList
-                          teamMembers={teamMembers}
-                          onEdit={handleEditMember}
-                          onDelete={handleDeleteMember}
-                          onToggleActive={handleToggleActive}
-                        />
-                      </SortableContext>
-                    </TableBody>
-                  </Table>
-                </div>
-              </DndContext>
-            )}
+        {/* Sort and Pagination Controls */}
+        <motion.div
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white border-b"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Urut:</span>
+            <Select value={currentSortBy} onValueChange={handleSortChange}>
+              <SelectTrigger className="w-[160px] bg-white">
+                <SelectValue placeholder="Urut berdasarkan" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="displayOrder">Urutan tampilan</SelectItem>
+                <SelectItem value="name">Nama</SelectItem>
+                <SelectItem value="position">Jabatan</SelectItem>
+                <SelectItem value="createdAt">Tanggal dibuat</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9"
+              onClick={toggleSortOrder}
+            >
+              {currentSortOrder === "ASC" ? (
+                <ChevronUpIcon className="h-4 w-4" />
+              ) : (
+                <ChevronDownIcon className="h-4 w-4" />
+              )}
+            </Button>
           </div>
-        </CardContent>
+
+          <div className="flex items-center gap-3">
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="h-9"
+              >
+                <RefreshCwIcon
+                  className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Button onClick={handleAddNewMember} size="sm" className="h-9">
+                <Plus className="h-4 w-4 mr-2" />
+                Tambah Anggota
+              </Button>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Team Members List */}
+        <div className="overflow-hidden">
+          {isLoading ? (
+            <TeamMembersLoading />
+          ) : teamMembers.length === 0 ? (
+            <EmptyTeamState onAddMember={handleAddNewMember} />
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+              modifiers={[restrictToVerticalAxis]}
+            >
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-50 hover:bg-slate-100">
+                      <TableHead className="w-[80px]">Foto</TableHead>
+                      <TableHead>Nama</TableHead>
+                      <TableHead className="hidden sm:table-cell">
+                        Jabatan
+                      </TableHead>
+                      <TableHead className="text-center">Aktif</TableHead>
+                      <TableHead>Aksi</TableHead>
+                      <TableHead className="w-[60px] text-center">
+                        <Badge variant="outline" className="whitespace-nowrap">
+                          Urutan
+                        </Badge>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <SortableContext
+                      items={teamMembers.map((member) => member.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <TeamMembersList
+                        teamMembers={teamMembers}
+                        onEdit={handleEditMember}
+                        onDelete={handleDeleteMember}
+                        onToggleActive={handleToggleActive}
+                      />
+                    </SortableContext>
+                  </TableBody>
+                </Table>
+              </div>
+            </DndContext>
+          )}
+        </div>
 
         {/* Pagination Footer */}
-        {!isLoading && teamMembers.length > 0 && (
-          <CardFooter className="flex flex-col sm:flex-row justify-between items-center border-t pt-6 pb-4 text-center sm:text-left bg-white gap-4 sm:gap-6">
-            <div className="text-sm text-muted-foreground w-full sm:w-auto">
-              Menampilkan {(page - 1) * limit + 1}-
-              {Math.min(page * limit, pagination.totalItems)} dari{" "}
-              {pagination.totalItems} anggota tim
-            </div>
+        <motion.div
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white border-t"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Tampilkan:</span>
+            <Select value={currentLimit} onValueChange={handlePerPageChange}>
+              <SelectTrigger className="w-[80px] bg-white">
+                <SelectValue placeholder="Per page" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-muted-foreground ml-4">
+              {pagination.totalItems > 0 ? (
+                <>
+                  Menampilkan {(page - 1) * limit + 1}-
+                  {Math.min(page * limit, pagination.totalItems)} dari{" "}
+                  {pagination.totalItems} anggota tim
+                </>
+              ) : (
+                "Tidak ada anggota tim"
+              )}
+            </span>
+          </div>
 
-            <Pagination className="w-full sm:w-auto">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => handlePageChange(page - 1)}
-                    className={
-                      !pagination.hasPrevPage
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
+          {pagination.totalPages > 0 && (
+            <div className="flex justify-center">
+              <nav className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={!pagination.hasPrevPage}
+                >
+                  <ChevronDownIcon className="h-4 w-4 rotate-90" />
+                </Button>
 
                 {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
                   .filter((p) => {
@@ -686,48 +756,53 @@ export default function TeamPage() {
                     if (i > 0 && arr[i - 1] !== p - 1) {
                       return (
                         <React.Fragment key={`ellipsis-${p}`}>
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationLink
-                              isActive={page === p}
-                              onClick={() => handlePageChange(p)}
-                            >
-                              {p}
-                            </PaginationLink>
-                          </PaginationItem>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            disabled
+                          >
+                            ...
+                          </Button>
+                          <Button
+                            variant={page === p ? "default" : "outline"}
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handlePageChange(p)}
+                          >
+                            {p}
+                          </Button>
                         </React.Fragment>
                       );
                     }
 
                     return (
-                      <PaginationItem key={p}>
-                        <PaginationLink
-                          isActive={page === p}
-                          onClick={() => handlePageChange(p)}
-                        >
-                          {p}
-                        </PaginationLink>
-                      </PaginationItem>
+                      <Button
+                        key={p}
+                        variant={page === p ? "default" : "outline"}
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handlePageChange(p)}
+                      >
+                        {p}
+                      </Button>
                     );
                   })}
 
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => handlePageChange(page + 1)}
-                    className={
-                      !pagination.hasNextPage
-                        ? "pointer-events-none opacity-50"
-                        : "cursor-pointer"
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </CardFooter>
-        )}
-      </Card>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={!pagination.hasNextPage}
+                >
+                  <ChevronDownIcon className="h-4 w-4 -rotate-90" />
+                </Button>
+              </nav>
+            </div>
+          )}
+        </motion.div>
+      </div>
 
       {/* Team Member Dialog */}
       <TeamMemberDialog
