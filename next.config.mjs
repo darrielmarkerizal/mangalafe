@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["mdlokatara.com"],
+    domains: ["cdn.mdlokatara.com"],
   },
   // Gunakan salah satu opsi saja, tidak keduanya untuk paket yang sama
   experimental: {
