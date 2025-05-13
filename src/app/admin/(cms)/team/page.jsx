@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
@@ -71,7 +71,7 @@ import TeamMembersLoading from "@/components/cms/team/team-members-loading";
 import EmptyTeamState from "@/components/cms/team/empty-team-state";
 import NetworkErrorDialog from "@/components/cms/team/network-error-dialog";
 
-export default function TeamPage() {
+function TeamPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -831,5 +831,28 @@ export default function TeamPage() {
         retryFile={retryUpload}
       />
     </motion.div>
+  );
+}
+
+// This is the main page component that implements the Suspense boundary
+export default function TeamPage() {
+  return (
+    <Suspense fallback={<TeamPageLoading />}>
+      <TeamPageContent />
+    </Suspense>
+  );
+}
+
+// Simple loading component
+function TeamPageLoading() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm border p-8">
+        <div className="flex flex-col gap-4 items-center justify-center">
+          <div className="h-8 w-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="text-muted-foreground">Memuat data tim...</p>
+        </div>
+      </div>
+    </div>
   );
 }
