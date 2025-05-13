@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 const CardPortfolio = ({
+  type,
   title,
   description,
   imageUrl,
@@ -42,7 +43,13 @@ const CardPortfolio = ({
   const DescriptionText = () => {
     if (!description) {
       return (
-        <p className="mb-3 text-[16px] text-white font-plus-jakarta-sans">-</p>
+        <p
+          className={`mb-3 text-[16px] ${
+            type === "list-no-image" ? "text-primary" : "text-white"
+          } font-plus-jakarta-sans`}
+        >
+          -
+        </p>
       );
     }
 
@@ -51,7 +58,11 @@ const CardPortfolio = ({
 
       return (
         <div className="mb-3">
-          <p className="text-[16px] text-white font-plus-jakarta-sans">
+          <p
+            className={`text-[16px] ${
+              type === "list-no-image" ? "text-primary" : "text-white"
+            } font-plus-jakarta-sans`}
+          >
             {showFullDescription
               ? description
               : truncateDescription(description)}
@@ -73,7 +84,11 @@ const CardPortfolio = ({
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <p className="mb-3 text-[16px] text-white font-plus-jakarta-sans cursor-help">
+          <p
+            className={`mb-3 text-[16px] ${
+              type === "list-no-image" ? "text-primary" : "text-white"
+            } font-plus-jakarta-sans cursor-help`}
+          >
             {truncateDescription(description)}
           </p>
         </TooltipTrigger>
@@ -94,7 +109,11 @@ const CardPortfolio = ({
             <Badge
               key={index}
               variant="outline"
-              className="bg-white text-primary border-transparent hover:bg-white/90 hover:text-primary font-semibold px-3 py-1"
+              className={`${
+                type === "list-no-image"
+                  ? "bg-primary text-white"
+                  : "bg-white text-primary"
+              } border-transparent hover:bg-white/90 hover:text-primary font-semibold px-3 py-1`}
             >
               {item}
             </Badge>
@@ -112,7 +131,11 @@ const CardPortfolio = ({
           <Badge
             key={index}
             variant="outline"
-            className="bg-white text-primary border-transparent hover:bg-white/90 hover:text-primary font-semibold px-3 py-1"
+            className={`${
+              type === "list-no-image"
+                ? "bg-primary text-white"
+                : "bg-white text-primary"
+            } border-transparent hover:bg-white/90 hover:text-primary font-semibold px-3 py-1`}
           >
             {item}
           </Badge>
@@ -122,7 +145,11 @@ const CardPortfolio = ({
             <TooltipTrigger asChild>
               <Badge
                 variant="outline"
-                className="bg-white text-primary border-transparent hover:bg-white/90 hover:text-primary font-semibold px-3 py-1 cursor-help"
+                className={`${
+                  type === "list-no-image"
+                    ? "bg-primary text-white"
+                    : "bg-white text-primary"
+                } border-transparent hover:bg-white/90 hover:text-primary font-semibold px-3 py-1 cursor-help`}
               >
                 +{remainingCount}
               </Badge>
@@ -146,7 +173,11 @@ const CardPortfolio = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative h-[188px] md:h-[356px] w-full">
+      <div
+        className={`relative h-[188px] md:h-[356px] w-full   ${
+          type === "list-no-image" ? "hidden" : "block"
+        }`}
+      >
         <Image
           src={imageUrl || "./images/hero-bg.png"}
           alt={title}
@@ -154,23 +185,29 @@ const CardPortfolio = ({
           className="object-cover"
         />
       </div>
-      <div className="p-4 bg-primary h-full">
+      <div
+        className={`p-4 ${
+          type === "list-no-image"
+            ? "bg-[#fffbec] text-primary"
+            : "bg-primary text-white"
+        } h-full`}
+      >
         {period && (
           <Badge
             variant="outline"
-            className="w-fit bg-white text-primary border-transparent hover:bg-white/90 hover:text-primary font-semibold px-3 py-1"
+            className={`${
+              type === "list-no-image"
+                ? "bg-primary text-white"
+                : "bg-white text-primary"
+            } border-transparent hover:bg-white/90 hover:text-primary font-semibold px-3 py-1`}
           >
             {period}
           </Badge>
         )}
-        <h3 className="mb-2 text-[20px] font-bold text-white font-montserrat">
-          {title}
-        </h3>
+        <h3 className="mb-2 text-[20px] font-bold font-montserrat">{title}</h3>
         <DescriptionText />
         <div className="flex flex-col gap-2">
-          <h3 className="text-[20px] font-bold text-white font-montserrat">
-            {client}
-          </h3>
+          <h3 className="text-[20px] font-bold font-montserrat">{client}</h3>
         </div>
         <div className="mt-4">
           <ServiceBadges />
