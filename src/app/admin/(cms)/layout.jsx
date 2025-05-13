@@ -6,16 +6,18 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import Cookies from "js-cookie";
 import {
-  LayoutDashboardIcon,
-  FileTextIcon,
-  UserIcon,
-  LogOutIcon,
-  MenuIcon,
-  XIcon,
-  ChevronRightIcon,
-  SearchIcon,
-  HelpCircleIcon,
-  ChevronLeftIcon,
+  LayoutDashboard,
+  FileText,
+  User,
+  LogOut,
+  Menu,
+  X,
+  ChevronRight,
+  Search,
+  HelpCircle,
+  ChevronLeft,
+  Users,
+  UserGroup,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -90,19 +92,25 @@ export default function AdminLayout({ children }) {
     {
       name: "Dashboard",
       href: "/admin/dashboard",
-      icon: LayoutDashboardIcon,
+      icon: LayoutDashboard,
       current: pathname === "/admin/dashboard",
     },
     {
       name: "Proyek",
       href: "/admin/projects",
-      icon: FileTextIcon,
+      icon: FileText,
       current: pathname.startsWith("/admin/projects"),
+    },
+    {
+      name: "Tim",
+      href: "/admin/team",
+      icon: Users,
+      current: pathname.startsWith("/admin/team"),
     },
     {
       name: "Admin",
       href: "/admin/users",
-      icon: UserIcon,
+      icon: User,
       current: pathname.startsWith("/admin/users"),
     },
   ];
@@ -196,7 +204,7 @@ export default function AdminLayout({ children }) {
             className="absolute right-2 rounded-full hover:bg-muted/50"
             onClick={() => setSidebarOpen(false)}
           >
-            <XIcon className="h-5 w-5" />
+            <X className="h-5 w-5" />
             <span className="sr-only">Close sidebar</span>
           </Button>
         </div>
@@ -260,7 +268,7 @@ export default function AdminLayout({ children }) {
                   </Badge>
                 )}
                 {item.current && (
-                  <ChevronRightIcon className="h-4 w-4 ml-2 text-white" />
+                  <ChevronRight className="h-4 w-4 ml-2 text-white" />
                 )}
               </div>
             </Link>
@@ -273,7 +281,7 @@ export default function AdminLayout({ children }) {
               onClick={handleLogout}
               disabled={isLoggingOut}
             >
-              <LogOutIcon
+              <LogOut
                 className={`h-5 w-5 ${isLoggingOut ? "animate-spin" : ""}`}
               />
               {isLoggingOut ? "Keluar..." : "Keluar"}
@@ -424,7 +432,7 @@ export default function AdminLayout({ children }) {
                         </Badge>
                       )}
                       {item.current && (
-                        <ChevronRightIcon className="h-4 w-4 ml-2 text-white" />
+                        <ChevronRight className="h-4 w-4 ml-2 text-white" />
                       )}
                     </div>
                   )}
@@ -453,12 +461,12 @@ export default function AdminLayout({ children }) {
                   >
                     {sidebarCollapsed ? (
                       <>
-                        <ChevronRightIcon className="h-4 w-4" />
+                        <ChevronRight className="h-4 w-4" />
                         <span className="text-[10px]">Perluas</span>
                       </>
                     ) : (
                       <>
-                        <ChevronLeftIcon className="h-4 w-4" />
+                        <ChevronLeft className="h-4 w-4" />
                         <span className="text-xs">Tutup Sidebar</span>
                       </>
                     )}
@@ -486,7 +494,7 @@ export default function AdminLayout({ children }) {
                   onClick={handleLogout}
                   disabled={isLoggingOut}
                 >
-                  <LogOutIcon
+                  <LogOut
                     className={`h-5 w-5 ${isLoggingOut ? "animate-spin" : ""}`}
                   />
                   {!sidebarCollapsed && (isLoggingOut ? "Keluar..." : "Keluar")}
@@ -523,7 +531,7 @@ export default function AdminLayout({ children }) {
             className="rounded-full hover:bg-muted/50 lg:hidden"
             onClick={() => setSidebarOpen(true)}
           >
-            <MenuIcon className="h-5 w-5" />
+            <Menu className="h-5 w-5" />
             <span className="sr-only">Open sidebar</span>
           </Button>
 
@@ -558,7 +566,7 @@ export default function AdminLayout({ children }) {
               size="icon"
               className="hidden sm:flex rounded-full h-8 w-8"
             >
-              <HelpCircleIcon className="h-5 w-5 text-muted-foreground" />
+              <HelpCircle className="h-5 w-5 text-muted-foreground" />
             </Button>
 
             {/* User dropdown */}
@@ -588,7 +596,7 @@ export default function AdminLayout({ children }) {
                   disabled={isLoggingOut}
                   className="text-red-600 focus:text-red-700 focus:bg-red-50"
                 >
-                  <LogOutIcon className="h-4 w-4 mr-2" />
+                  <LogOut className="h-4 w-4 mr-2" />
                   {isLoggingOut ? "Keluar..." : "Keluar"}
                 </DropdownMenuItem>
               </DropdownMenuContent>

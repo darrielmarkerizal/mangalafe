@@ -1,14 +1,65 @@
 import { NextResponse } from "next/server";
 import db from "../../../../models/index.js";
 import { verifyJwtToken } from "@/lib/jwt";
+import { Op } from "sequelize";
 
-// GET /api/team - Get all team members
+// GET /api/team - Get all team members with pagination, filtering, and sorting
 export async function GET(request) {
   try {
-    const teamMembers = await db.TeamMember.findAll({
-      order: [["displayOrder", "ASC"]],
+    const { searchParams } = new URL(request.url);
+    
+    // Pagination parameters
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const offset = (page - 1) * limit;
+    
+    // Search/filter parameters
+    const search = searchParams.get("search") || "";
+    const isActive = searchParams.get("isActive");
+    
+    // Sorting parameters
+    const sortBy = searchParams.get("sortBy") || "displayOrder";
+    const sortOrder = searchParams.get("sortOrder") || "ASC";
+    
+    // Build where clause for filtering
+    const whereClause = {};
+    
+    if (search) {
+      whereClause[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { position: { [Op.like]: `%${search}%` } }
+      ];
+    }
+    
+    if (isActive !== null && isActive !== undefined) {
+      whereClause.isActive = isActive === "true";
+    }
+    
+    // Execute query with all parameters
+    const { count, rows } = await db.TeamMember.findAndCountAll({
+      where: whereClause,
+      order: [[sortBy, sortOrder]],
+      limit,
+      offset,
     });
-    return NextResponse.json({ success: true, data: teamMembers });
+    
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(count / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+    
+    return NextResponse.json({
+      success: true,
+      data: rows,
+      meta: {
+        page,
+        limit,
+        totalItems: count,
+        totalPages,
+        hasNextPage,
+        hasPrevPage
+      }
+    });
   } catch (error) {
     console.error("Error getting team members:", error);
     return NextResponse.json(
