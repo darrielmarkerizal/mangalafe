@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation"; // Import useRouter
 import CardPortfolio from "../ui/card-portofolio";
-import CTAButton from "../ui/CTAbutton";
+import CTAButton from "../ui/CTAButton";
 
 const PengalamanKami = () => {
   const [projects, setProjects] = useState([]);
