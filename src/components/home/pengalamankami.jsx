@@ -14,7 +14,7 @@ const PengalamanKami = () => {
     const fetchProjects = async () => {
       try {
         const response = await axios.get(
-          "/api/project?page=1&perPage=3&sortBy=createdAt&sortOrder=DESC"
+          "/api/project?page=1&perPage=6&sortBy=createdAt&sortOrder=DESC"
         );
         setProjects(response.data.data); // Extract the 'data' array from the response
       } catch (error) {
@@ -59,7 +59,7 @@ const PengalamanKami = () => {
         <h2 className="text-[48px] font-montserrat text-white font-bold text-center mb-8">
           Pengalaman Kami
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {projects.map((project) => (
             <CardPortfolio
               key={project.id}
