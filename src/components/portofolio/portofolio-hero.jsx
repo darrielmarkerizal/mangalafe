@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence, useInView } from "framer-motion"; // Impor Framer Motion
+import { PortfolioTable } from "../ui/portfolio-table";
 
 const SORT_OPTIONS = {
   "createdAt-DESC": { label: "Terbaru", icon: "↓" },
@@ -680,136 +681,14 @@ const PortfolioHero = () => {
             </motion.div>
           </motion.div>
         ) : (
-          <>
-            <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              <AnimatePresence>
-                {projects.map((project) => (
-                  <motion.div
-                    key={project.id}
-                    variants={cardVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                    layout
-                  >
-                    <CardPortfolio
-                      title={project.name}
-                      description={getProjectDescription(project)}
-                      imageUrl={
-                        isValidImageUrl(project.photo)
-                          ? project.photo
-                          : "/logo.svg"
-                      }
-                      service={project.Services.map((service) => service.name)}
-                      client={project.initiator}
-                      period={project.period}
-                      link={`/portfolio/${project.id}`}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-
-            <motion.div
-              className="mt-8 flex flex-col sm:flex-row items-center gap-6 bg-background rounded-lg p-6 shadow-sm border"
-              variants={containerVariants}
-              initial="hidden"
-              animate={isInView ? "visible" : "hidden"}
-            >
-              <motion.div
-                className="flex items-center gap-2 text-sm text-muted-foreground w-full sm:w-auto"
-                variants={itemVariants}
-              >
-                <span>Menampilkan</span>
-                <Select
-                  value={itemsPerPage}
-                  onValueChange={(value) => {
-                    setItemsPerPage(value);
-                    setCurrentPage(1);
-                    fetchProjects(true);
-                  }}
-                >
-                  <SelectTrigger className="w-[70px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="6">6</SelectItem>
-                    <SelectItem value="12">12</SelectItem>
-                    <SelectItem value="24">24</SelectItem>
-                  </SelectContent>
-                </Select>
-                <span>item per halaman</span>
-              </motion.div>
-
-              <motion.div
-                className="w-full sm:w-auto flex justify-center sm:ml-auto"
-                variants={itemVariants}
-              >
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <PaginationPrevious
-                          onClick={() =>
-                            setCurrentPage((prev) => Math.max(prev - 1, 1))
-                          }
-                          disabled={currentPage === 1}
-                          className="hover:bg-primary hover:text-white transition-colors"
-                        />
-                      </motion.div>
-                    </PaginationItem>
-                    {Array.from(
-                      { length: Math.max(totalPages, 1) },
-                      (_, i) => i + 1
-                    ).map((page) => (
-                      <PaginationItem key={page}>
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <PaginationLink
-                            onClick={() => setCurrentPage(page)}
-                            isActive={currentPage === page}
-                            className={`hover:bg-primary/10 transition-colors ${
-                              currentPage === page
-                                ? "bg-primary text-white hover:bg-primary/90"
-                                : ""
-                            }`}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </motion.div>
-                      </PaginationItem>
-                    ))}
-                    <PaginationItem>
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <PaginationNext
-                          onClick={() =>
-                            setCurrentPage((prev) =>
-                              Math.min(prev + 1, Math.max(totalPages, 1))
-                            )
-                          }
-                          disabled={currentPage === Math.max(totalPages, 1)}
-                          className="hover:bg-primary hover:text-white transition-colors"
-                        />
-                      </motion.div>
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </motion.div>
-            </motion.div>
-          </>
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="w-full overflow-hidden"
+          >
+            <PortfolioTable projects={projects} isLoading={isLoading} />
+          </motion.div>
         )}
       </div>
     </section>
