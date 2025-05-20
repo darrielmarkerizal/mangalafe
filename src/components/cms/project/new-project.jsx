@@ -72,7 +72,7 @@ const projectSchema = z.object({
   name: z.string().min(3, { message: "Nama proyek minimal 3 karakter" }),
   initiator: z
     .string()
-    .min(2, { message: "Nama initiator minimal 2 karakter" }),
+    .min(2, { message: "Nama pemrakarsa minimal 2 karakter" }),
   period: z.coerce
     .number()
     .int()
@@ -497,7 +497,7 @@ export default function ProjectForm({ project = null, onSuccess }) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            <RequiredLabel>Initiator</RequiredLabel>
+                            <RequiredLabel>Pemrakarsa</RequiredLabel>
                           </FormLabel>
                           <div className="relative">
                             <BuildingIcon className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
