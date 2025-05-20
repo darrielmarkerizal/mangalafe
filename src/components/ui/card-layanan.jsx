@@ -5,7 +5,7 @@ const CardLayanan = ({ title, description, icon, index }) => {
   const isLargeTitle = index >= 4 && index <= 7;
 
   return (
-    <div className="bg-primary rounded-[10px] shadow-lg p-6">
+    <div className="bg-primary rounded-[10px] shadow-lg p-6 h-full flex flex-col">
       <div className="w-12 h-12">
         <Image
           src={icon}
@@ -22,7 +22,7 @@ const CardLayanan = ({ title, description, icon, index }) => {
       >
         {title}
       </h3>
-      <p className="font-plus-jakarta-sans text-[16px] text-white mt-2">
+      <p className="font-plus-jakarta-sans text-[16px] text-white mt-2 flex-grow">
         {description}
       </p>
     </div>
