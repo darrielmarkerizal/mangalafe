@@ -503,7 +503,7 @@ export default function ProjectForm({ project = null, onSuccess }) {
                             <BuildingIcon className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
                             <FormControl>
                               <Input
-                                placeholder="Masukkan nama initiator"
+                                placeholder="Masukkan nama pemrakarsa"
                                 {...field}
                                 disabled={isLoading}
                                 className="pl-9"
