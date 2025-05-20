@@ -4,7 +4,7 @@ import Image from "next/image";
 const CardTim = ({ name, position, image }) => {
   return (
     <div className="flex flex-col">
-      <div className="relative aspect-video md:aspect-square w-full rounded-[12px] overflow-hidden">
+      <div className="relative aspect-[3/4] md:aspect-square w-full rounded-[12px] overflow-hidden">
         {/* Image */}
         <Image
           src={image}
