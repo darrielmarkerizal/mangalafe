@@ -50,7 +50,7 @@ const PengalamanKami = () => {
 
   const getProjectDescription = (project) => {
     if (project.description) return project.description;
-    return `Proyek ${project.name} yang diinisiasi oleh ${project.initiator} pada tahun ${project.period}`;
+    return `Proyek ${project.name} yang diprakarsai oleh ${project.initiator} pada tahun ${project.period}`;
   };
 
   return (
