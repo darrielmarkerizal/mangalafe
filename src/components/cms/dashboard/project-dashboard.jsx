@@ -43,6 +43,8 @@ export function ProjectDashboard() {
       const response = await axios.get("/api/project/dashboard");
       if (response.data.success) {
         setProjects(response.data.data.latestProjects);
+
+        // Create Total Proyek card first
         const mappedStats = [
           {
             title: "Total Proyek",
@@ -50,98 +52,91 @@ export function ProjectDashboard() {
             description: "Semua proyek dalam database",
             icon: FileTextIcon,
           },
-          {
-            title: "PKKPR",
-            value:
-              (response.data.data.byService.find((s) => s.name === "PKKPR ")
-                ?.count || 0) +
-              (response.data.data.byService.find((s) => s.name === "PKKPRL")
-                ?.count || 0),
-            description: "Persetujuan Kesesuaian",
-            icon: MapIcon,
-            iconColor: "text-blue-500",
-          },
-          {
-            title: "AMDAL",
-            value:
-              (response.data.data.byService.find((s) => s.name === "AMDAL ")
-                ?.count || 0) +
-              (response.data.data.byService.find((s) => s.name === "DELH")
-                ?.count || 0),
-            description: "Analisis Dampak Lingkungan",
-            icon: ActivityIcon,
-            iconColor: "text-green-500",
-          },
-          {
-            title: "UKL-UPL",
-            value:
-              (response.data.data.byService.find((s) => s.name === "UKL-UPL ")
-                ?.count || 0) +
-              (response.data.data.byService.find((s) => s.name === "DPLH")
-                ?.count || 0),
-            description: "Upaya Pengelolaan",
-            icon: ClipboardCheckIcon,
-            iconColor: "text-yellow-500",
-          },
-          {
-            title: "Pemantauan",
-            value:
-              response.data.data.byService.find(
-                (s) =>
-                  s.name === "Laporan Pemantauan dan Pengelolaan Lingkungan"
-              )?.count || 0,
-            description: "Laporan Pemantauan",
-            icon: BarChartIcon,
-            iconColor: "text-purple-500",
-          },
-          {
-            title: "PERTEK",
-            value:
-              response.data.data.byService.find((s) => s.name === "PERTEK")
-                ?.count || 0,
-            description: "Persetujuan Teknis",
-            icon: FileTextIcon,
-            iconColor: "text-red-500",
-          },
-          {
-            title: "LARAP",
-            value:
-              response.data.data.byService.find((s) => s.name === "LARAP")
-                ?.count || 0,
-            description: "Land Acquisition",
-            icon: HomeIcon,
-            iconColor: "text-orange-500",
-          },
-          {
-            title: "Transportasi",
-            value:
-              response.data.data.byService.find(
-                (s) => s.name === "Studi dan Kajian Bidang Transportasi"
-              )?.count || 0,
-            description: "Studi Transportasi",
-            icon: CarIcon,
-            iconColor: "text-teal-500",
-          },
-          {
-            title: "Survey",
-            value:
-              response.data.data.byService.find(
-                (s) => s.name === "Jasa Survey Lingkungan"
-              )?.count || 0,
-            description: "Jasa Survey Lingkungan",
-            icon: SearchIcon,
-            iconColor: "text-indigo-500",
-          },
-          {
-            title: "ANDALIN",
-            value:
-              response.data.data.byService.find((s) => s.name === "ANDALIN")
-                ?.count || 0,
-            description: "Analisis Dampak Lalu Lintas",
-            icon: ActivityIcon,
-            iconColor: "text-emerald-500",
-          },
         ];
+
+        // Add separate card for each service with appropriate icon
+        const serviceIconMap = {
+          PKKPR: {
+            icon: MapIcon,
+            color: "text-blue-500",
+            desc: "Persetujuan Kesesuaian",
+          },
+          PKKPRL: {
+            icon: MapIcon,
+            color: "text-blue-500",
+            desc: "Persetujuan Kesesuaian",
+          },
+          AMDAL: {
+            icon: ActivityIcon,
+            color: "text-green-500",
+            desc: "Analisis Dampak Lingkungan",
+          },
+          DELH: {
+            icon: ActivityIcon,
+            color: "text-green-500",
+            desc: "Dokumen Evaluasi Lingkungan Hidup",
+          },
+          "UKL-UPL": {
+            icon: ClipboardCheckIcon,
+            color: "text-yellow-500",
+            desc: "Upaya Pengelolaan",
+          },
+          DPLH: {
+            icon: ClipboardCheckIcon,
+            color: "text-yellow-500",
+            desc: "Dokumen Pengelolaan Lingkungan Hidup",
+          },
+          "Laporan Pemantauan dan Pengelolaan Lingkungan": {
+            icon: BarChartIcon,
+            color: "text-purple-500",
+            desc: "Laporan Pemantauan",
+          },
+          PERTEK: {
+            icon: FileTextIcon,
+            color: "text-red-500",
+            desc: "Persetujuan Teknis",
+          },
+          LARAP: {
+            icon: HomeIcon,
+            color: "text-orange-500",
+            desc: "Land Acquisition",
+          },
+          "Studi dan Kajian Bidang Transportasi": {
+            icon: CarIcon,
+            color: "text-teal-500",
+            desc: "Studi Transportasi",
+          },
+          "Jasa Survey Lingkungan": {
+            icon: SearchIcon,
+            color: "text-indigo-500",
+            desc: "Jasa Survey",
+          },
+          ANDALIN: {
+            icon: ActivityIcon,
+            color: "text-emerald-500",
+            desc: "Analisis Dampak Lalu Lintas",
+          },
+        };
+
+        // Map each service to a stat card
+        response.data.data.byService.forEach((service) => {
+          // Extract base service name (without trailing spaces)
+          const baseName = service.name.trim();
+          const serviceConfig = serviceIconMap[baseName] || {
+            icon: FileTextIcon,
+            color: "text-gray-500",
+            desc: baseName,
+          };
+
+          mappedStats.push({
+            title: baseName,
+            value: service.count,
+            description: serviceConfig.desc,
+            icon: serviceConfig.icon,
+            iconColor: serviceConfig.color,
+          });
+        });
+
         setStatsData(mappedStats);
         setFilteredStats(mappedStats);
       } else {
