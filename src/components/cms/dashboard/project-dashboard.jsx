@@ -53,9 +53,10 @@ export function ProjectDashboard() {
           {
             title: "PKKPR",
             value:
-              response.data.data.byService.find(
-                (s) => s.name === "PKKPR & PKKPRL"
-              )?.count || 0,
+              (response.data.data.byService.find((s) => s.name === "PKKPR ")
+                ?.count || 0) +
+              (response.data.data.byService.find((s) => s.name === "PKKPRL")
+                ?.count || 0),
             description: "Persetujuan Kesesuaian",
             icon: MapIcon,
             iconColor: "text-blue-500",
@@ -63,9 +64,10 @@ export function ProjectDashboard() {
           {
             title: "AMDAL",
             value:
-              response.data.data.byService.find(
-                (s) => s.name === "AMDAL & DELH"
-              )?.count || 0,
+              (response.data.data.byService.find((s) => s.name === "AMDAL ")
+                ?.count || 0) +
+              (response.data.data.byService.find((s) => s.name === "DELH")
+                ?.count || 0),
             description: "Analisis Dampak Lingkungan",
             icon: ActivityIcon,
             iconColor: "text-green-500",
@@ -73,9 +75,10 @@ export function ProjectDashboard() {
           {
             title: "UKL-UPL",
             value:
-              response.data.data.byService.find(
-                (s) => s.name === "UKL-UPL & DPLH"
-              )?.count || 0,
+              (response.data.data.byService.find((s) => s.name === "UKL-UPL ")
+                ?.count || 0) +
+              (response.data.data.byService.find((s) => s.name === "DPLH")
+                ?.count || 0),
             description: "Upaya Pengelolaan",
             icon: ClipboardCheckIcon,
             iconColor: "text-yellow-500",
@@ -128,6 +131,15 @@ export function ProjectDashboard() {
             description: "Jasa Survey Lingkungan",
             icon: SearchIcon,
             iconColor: "text-indigo-500",
+          },
+          {
+            title: "ANDALIN",
+            value:
+              response.data.data.byService.find((s) => s.name === "ANDALIN")
+                ?.count || 0,
+            description: "Analisis Dampak Lalu Lintas",
+            icon: ActivityIcon,
+            iconColor: "text-emerald-500",
           },
         ];
         setStatsData(mappedStats);
