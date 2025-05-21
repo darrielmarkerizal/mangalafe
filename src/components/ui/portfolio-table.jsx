@@ -31,7 +31,7 @@ export function PortfolioTable({ projects, isLoading }) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40%]">Nama Proyek</TableHead>
-              <TableHead className="w-[25%]">Inisiator</TableHead>
+              <TableHead className="w-[25%]">Pemrakarsa</TableHead>
               <TableHead className="w-[10%]">Tahun</TableHead>
               <TableHead className="w-[25%]">Layanan</TableHead>
             </TableRow>
@@ -69,7 +69,7 @@ export function PortfolioTable({ projects, isLoading }) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40%]">Nama Proyek</TableHead>
-              <TableHead className="w-[25%]">Inisiator</TableHead>
+              <TableHead className="w-[25%]">Pemrakarsa</TableHead>
               <TableHead className="w-[10%]">Tahun</TableHead>
               <TableHead className="w-[25%]">Layanan</TableHead>
             </TableRow>
@@ -115,7 +115,7 @@ export function PortfolioTable({ projects, isLoading }) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40%]">Nama Proyek</TableHead>
-              <TableHead className="w-[25%]">Inisiator</TableHead>
+              <TableHead className="w-[25%]">Pemrakarsa</TableHead>
               <TableHead className="w-[10%]">Tahun</TableHead>
               <TableHead className="w-[25%]">Layanan</TableHead>
             </TableRow>

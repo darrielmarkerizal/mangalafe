@@ -51,7 +51,7 @@ export function ProjectTableDashboard({
           <TableRow className="bg-muted/30 hover:bg-muted/30">
             <TableHead className="w-12 font-semibold">No.</TableHead>
             <TableHead className="font-semibold">Nama Proyek</TableHead>
-            <TableHead className="font-semibold">Initiator</TableHead>
+            <TableHead className="font-semibold">Pemrakarsa</TableHead>
             <TableHead className="font-semibold">Periode</TableHead>
             <TableHead className="font-semibold">Layanan</TableHead>
             <TableHead className="text-right font-semibold">Aksi</TableHead>
