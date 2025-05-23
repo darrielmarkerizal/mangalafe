@@ -155,7 +155,7 @@ export default function ProjectForm({ project = null, onSuccess }) {
   useEffect(() => {
     const formValues = form.getValues();
     let filledFields = 0;
-    let totalFields = 3;
+    let totalFields = 4;
 
     if (formValues.name.trim().length >= 3) filledFields++;
     if (formValues.initiator.trim().length >= 2) filledFields++;
