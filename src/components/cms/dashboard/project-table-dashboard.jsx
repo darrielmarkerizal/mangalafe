@@ -129,10 +129,33 @@ export function ProjectTableDashboard({
                   <TableCell className="font-medium text-muted-foreground">
                     {index + 1}
                   </TableCell>
-                  <TableCell className="font-semibold text-primary/90">
-                    {project.name}
+                  <TableCell className="font-semibold text-primary/90 max-w-[180px]">
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="truncate">{project.name}</div>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="max-w-[300px] break-words"
+                        >
+                          <p className="text-xs">{project.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </TableCell>
-                  <TableCell>{project.initiator}</TableCell>
+                  <TableCell className="max-w-[150px]">
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="truncate">{project.initiator}</div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          <p className="text-xs">{project.initiator}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
                   <TableCell>
                     <Badge
                       variant="outline"
