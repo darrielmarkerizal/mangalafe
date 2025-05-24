@@ -1,17 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import CardPortfolio from "../ui/card-portofolio";
 import axios from "axios";
 import { toast } from "sonner";
-import {
-  Loader2,
-  Search,
-  SlidersHorizontal,
-  ChevronLeft,
-  ChevronRight,
-  ArrowUpDown,
-} from "lucide-react";
+import { Loader2, Search, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +20,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,
 } from "@/components/ui/sheet";
 import {
   Pagination,
@@ -40,7 +31,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
-import { motion, AnimatePresence, useInView } from "framer-motion"; // Impor Framer Motion
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { PortfolioTable } from "../ui/portfolio-table";
 
 const SORT_OPTIONS = {
@@ -107,9 +98,10 @@ const PortfolioHero = () => {
   const [sortOrder, setSortOrder] = useState("DESC");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [perPage] = useState(6);
-  const [itemsPerPage, setItemsPerPage] = useState("6");
+  const [perPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState("10");
   const [sortOption, setSortOption] = useState("createdAt-DESC");
+  const [totalItems, setTotalItems] = useState(0);
 
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "0px" });
@@ -148,16 +140,19 @@ const PortfolioHero = () => {
         if (response.data.success && response.data.data) {
           setProjects(response.data.data);
           setTotalPages(response.data.metadata?.totalPages || 1);
+          setTotalItems(response.data.metadata?.totalItems || 0);
           setCurrentPage(resetPage ? 1 : currentPage);
         } else {
           setProjects([]);
           setTotalPages(1);
+          setTotalItems(0);
           setCurrentPage(1);
         }
       } catch (apiError) {
         if (apiError.response?.status === 404) {
           setProjects([]);
           setTotalPages(1);
+          setTotalItems(0);
           setCurrentPage(1);
         } else {
           throw apiError;
@@ -167,6 +162,7 @@ const PortfolioHero = () => {
       console.error("Error fetching projects:", error);
       setProjects([]);
       setTotalPages(1);
+      setTotalItems(0);
       setCurrentPage(1);
 
       if (error.code === "ERR_NETWORK") {
@@ -224,20 +220,22 @@ const PortfolioHero = () => {
     setSelectedService("all");
     setSearch("");
     setCurrentPage(1);
-    setItemsPerPage("6");
+    setItemsPerPage("10");
 
     try {
       setIsLoading(true);
       const response = await axios.get(
-        "/api/project?page=1&perPage=6&sortBy=createdAt&sortOrder=DESC"
+        "/api/project?page=1&perPage=10&sortBy=createdAt&sortOrder=DESC"
       );
       setProjects(response.data.data || []);
       setTotalPages(response.data.metadata?.totalPages || 1);
+      setTotalItems(response.data.metadata?.totalItems || 0);
       setCurrentPage(1);
     } catch (error) {
       console.error("Error resetting projects:", error);
       setProjects([]);
       setTotalPages(1);
+      setTotalItems(0);
 
       if (error.response?.status !== 404) {
         toast.error("Gagal memuat ulang data", {
@@ -292,6 +290,7 @@ const PortfolioHero = () => {
         if (response.data.success && response.data.data) {
           setProjects(response.data.data);
           setTotalPages(response.data.metadata?.totalPages || 1);
+          setTotalItems(response.data.metadata?.totalItems || 0);
           setCurrentPage(1);
         } else {
           throw new Error("No data found");
@@ -303,6 +302,7 @@ const PortfolioHero = () => {
         ) {
           setProjects([]);
           setTotalPages(1);
+          setTotalItems(0);
           setCurrentPage(1);
         } else {
           throw apiError;
@@ -313,6 +313,7 @@ const PortfolioHero = () => {
 
       setProjects([]);
       setTotalPages(1);
+      setTotalItems(0);
       setCurrentPage(1);
 
       if (error.response?.status !== 404) {
@@ -688,6 +689,100 @@ const PortfolioHero = () => {
             className="w-full overflow-hidden"
           >
             <PortfolioTable projects={projects} isLoading={isLoading} />
+            {!isLoading && projects.length > 0 && (
+              <div className="mt-6 w-full flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <span className="text-sm text-muted-foreground">
+                    Tampilkan:
+                  </span>
+                  <Select
+                    value={itemsPerPage}
+                    onValueChange={(value) => {
+                      setItemsPerPage(value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[80px] h-9">
+                      <SelectValue placeholder="Per page" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <span className="text-sm text-muted-foreground hidden sm:inline">
+                    dari {totalItems} proyek
+                  </span>
+                </div>
+                {totalPages > 1 && (
+                  <Pagination className="w-full md:justify-end">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() =>
+                            setCurrentPage(Math.max(1, currentPage - 1))
+                          }
+                          className={
+                            currentPage <= 1
+                              ? "pointer-events-none opacity-50"
+                              : ""
+                          }
+                        />
+                      </PaginationItem>
+
+                      {[...Array(totalPages)].map((_, i) => {
+                        const page = i + 1;
+                        // Only show pages near current page and first/last pages
+                        if (
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 1 && page <= currentPage + 1)
+                        ) {
+                          return (
+                            <PaginationItem key={page}>
+                              <PaginationLink
+                                isActive={page === currentPage}
+                                onClick={() => setCurrentPage(page)}
+                              >
+                                {page}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        } else if (
+                          (page === currentPage - 2 && currentPage > 3) ||
+                          (page === currentPage + 2 &&
+                            currentPage < totalPages - 2)
+                        ) {
+                          return (
+                            <PaginationItem key={page}>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          );
+                        }
+                        return null;
+                      })}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() =>
+                            setCurrentPage(
+                              Math.min(totalPages, currentPage + 1)
+                            )
+                          }
+                          className={
+                            currentPage >= totalPages
+                              ? "pointer-events-none opacity-50"
+                              : ""
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                )}
+              </div>
+            )}
           </motion.div>
         )}
       </div>
